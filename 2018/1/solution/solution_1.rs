@@ -29,25 +29,21 @@ fn main() {
 }
 
 fn compute_frequency(file: &Path) -> Result<i32, std::io::Error> {
-    match read_lines(file) {
-        Ok(lines) => {
-            let mut frequency: i32 = 0;
-            for line in lines {
-                if let Ok(frequency_change_str) = line {
-                    match frequency_change_str.parse::<i32>() {
-                        Ok(frequency_change) => {
-                            frequency += frequency_change;
-                        },
-                        Err(e) => {
-                            eprintln!("Problem parsing frequency change `{}`: {}", frequency_change_str, e);
-                        }
-                    }
+    let lines = read_lines(file)?;
+    let mut frequency: i32 = 0;
+    for line in lines {
+        if let Ok(frequency_change_str) = line {
+            match frequency_change_str.parse::<i32>() {
+                Ok(frequency_change) => {
+                    frequency += frequency_change;
+                },
+                Err(e) => {
+                    eprintln!("error parsing frequency change `{}`: {}", frequency_change_str, e);
                 }
             }
-            Ok(frequency)
-        },
-        Err(e) => Err(e),
+        }
     }
+    Ok(frequency)
 }
 
 fn find_first_frequency_reached_twice(file: &Path) -> Result<i32, std::io::Error> {
@@ -57,34 +53,27 @@ fn find_first_frequency_reached_twice(file: &Path) -> Result<i32, std::io::Error
     loop {
         // TODO: Find a better way than opening multiple times the file
         // something like cycle over iterator
-        match read_lines(file) {
-            Ok(lines) => {
-                for line in lines {
-                    if let Ok(frequency_change_str) = line {
-                        match frequency_change_str.parse::<i32>() {
-                            Ok(frequency_change) => {
-                                frequency += frequency_change;
-                                if frequencies.contains(&frequency) {
-                                    return Ok(frequency);
-                                }
-                                frequencies.insert(frequency);
-                            },
-                            Err(e) => {
-                                eprintln!("Problem parsing frequency change `{}`: {}", frequency_change_str, e);
-                            }
+        let lines = read_lines(file)?;
+        for line in lines {
+            if let Ok(frequency_change_str) = line {
+                match frequency_change_str.parse::<i32>() {
+                    Ok(frequency_change) => {
+                        frequency += frequency_change;
+                        if frequencies.contains(&frequency) {
+                            return Ok(frequency);
                         }
+                        frequencies.insert(frequency);
+                    },
+                    Err(e) => {
+                        eprintln!("error parsing frequency change `{}`: {}", frequency_change_str, e);
                     }
                 }
-            },
-            Err(e) => return Err(e),
+            }
         }
     }
 }
 
 fn read_lines(filename: &Path) -> std::result::Result<std::io::Lines<std::io::BufReader<std::fs::File>>, std::io::Error> {
-    let f = File::open(filename);
-    match f {
-        Ok(file) => Ok(io::BufReader::new(file).lines()),
-        Err(e) => return Err(e),
-    }
+    let file = File::open(filename)?;
+    Ok(io::BufReader::new(file).lines())
 }
