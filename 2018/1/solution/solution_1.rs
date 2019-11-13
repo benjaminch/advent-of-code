@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 use std::fs::File;
-use std::io::{self, BufRead, Error, ErrorKind};
+use std::io::{self, BufRead};
 use std::path::Path;
 use std::process;
 
@@ -51,29 +51,33 @@ fn compute_frequency(file: &Path) -> Result<i32, std::io::Error> {
 }
 
 fn find_first_frequency_reached_twice(file: &Path) -> Result<i32, std::io::Error> {
-    match read_lines(file) {
-        Ok(lines) => {
-            let mut frequency: i32 = 0;
-            let mut frequencies = HashSet::new();
-            for line in lines {
-                if let Ok(frequency_change_str) = line {
-                    match frequency_change_str.parse::<i32>() {
-                        Ok(frequency_change) => {
-                            frequency += frequency_change;
-                            if frequencies.contains(&frequency) {
-                                return Ok(frequency);
+    let mut frequency: i32 = 0;
+    let mut frequencies = HashSet::new();
+    frequencies.insert(frequency);
+    loop {
+        // TODO: Find a better way than opening multiple times the file
+        // something like cycle over iterator
+        match read_lines(file) {
+            Ok(lines) => {
+                for line in lines {
+                    if let Ok(frequency_change_str) = line {
+                        match frequency_change_str.parse::<i32>() {
+                            Ok(frequency_change) => {
+                                frequency += frequency_change;
+                                if frequencies.contains(&frequency) {
+                                    return Ok(frequency);
+                                }
+                                frequencies.insert(frequency);
+                            },
+                            Err(e) => {
+                                eprintln!("Problem parsing frequency change `{}`: {}", frequency_change_str, e);
                             }
-                            frequencies.insert(frequency);
-                        },
-                        Err(e) => {
-                            eprintln!("Problem parsing frequency change `{}`: {}", frequency_change_str, e);
                         }
                     }
                 }
-            }
-            Err(Error::new(ErrorKind::Other, "doesn't seem to have any frequency appearing twice"))
-        },
-        Err(e) => Err(e),
+            },
+            Err(e) => return Err(e),
+        }
     }
 }
 
