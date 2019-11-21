@@ -9,8 +9,8 @@ fn main() {
     println!("Checksum: {}", checksum);
     
     // Part 2
-    let packages_id = find_packages_id_having_n_diff(Path::new("../input.txt"), 1);
-    println!("Package IDs: {:?}", packages_id);
+    let packages = find_packages_id_having_n_diff(Path::new("../input.txt"), 1);
+    println!("Packages: {:?}", packages);
 }
 
 fn compute_checksum(file: &Path) -> i32 {
@@ -37,21 +37,35 @@ fn compute_checksum(file: &Path) -> i32 {
     }
 }
 
-fn find_packages_id_having_n_diff(filename: &Path, diff_count: u32) -> HashSet<&str> {
-    let mut result = HashSet::new();
+#[derive(Debug)]
+struct MatchingPackages {
+    packages: HashSet<String>,
+    common_letters: String,
+    diff_count: u32,
+}
+
+fn find_packages_id_having_n_diff(filename: &Path, diff_count: u32) -> Vec<MatchingPackages> {
+    let mut result = Vec::new();
     match read_lines(filename) {
         Ok(lines) => {
-            let mut seen_packages = HashSet::new();
+            let mut seen_packages: HashSet<String> = HashSet::new();
             for line in lines {
-                if let Ok(l) = line && (seen_packages.len() > 0) {
-                    // compare current string with everyone already seen
-                    for seen in seen_packages {
-                        if count_letters_diff(l, seen) == diff_count {
-                            result.insert(seen);
-                            result.insert(l);
+                if let Ok(l) = line  {
+                    let package_id = l.clone();
+                    if seen_packages.len() > 0 {
+                        // compare current string with everyone already seen
+                        for seen in seen_packages.clone() {
+                            let (diffs, common_letters) = get_letters_diff(package_id.to_string(), seen.clone());
+                            if diffs == diff_count {
+                                result.push(MatchingPackages{
+                                    packages: [seen, package_id.to_string()].iter().cloned().collect(),
+                                    diff_count: diffs,
+                                    common_letters: common_letters,
+                                });
+                            }
                         }
                     }
-                    seen_packages.insert(l);
+                    seen_packages.insert(package_id.to_string());
                 }
             }
             return result; 
@@ -60,16 +74,20 @@ fn find_packages_id_having_n_diff(filename: &Path, diff_count: u32) -> HashSet<&
     }
 }
 
-fn count_letters_diff(w1: &str, w2: &str) -> u32 {
+fn get_letters_diff(w1: String, w2: String) -> (u32, String) {
     let mut diff = (w1.len() as i32 - w2.len() as i32).abs() as u32;
-    let w1_chars = w1.chars();
-    let w2_chars = w2.chars();
-    for i in 0..(w1.len() - diff as usize) {
-        if w1_chars.nth(i).unwrap() != w2_chars.nth(i).unwrap() {
+    let mut common_letters: Vec<String> = Vec::new();
+    let w1_chars = &mut w1.chars();
+    let w2_chars = &mut w2.chars();
+    while let (Some(w1_char), Some(w2_char)) = (w1_chars.next(), w2_chars.next()) {
+        if w1_char != w2_char {
             diff += 1;
         }
+        else {
+            common_letters.push(w1_char.to_string());
+        }
     }
-    return diff;
+    return (diff, common_letters.join(""));
 }
 
 fn read_lines(filename: &Path) -> std::result::Result<std::io::Lines<std::io::BufReader<std::fs::File>>, std::io::Error> {
