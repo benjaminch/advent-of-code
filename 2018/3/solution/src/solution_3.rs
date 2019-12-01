@@ -2,7 +2,7 @@
 extern crate lazy_static;
 extern crate regex;
 
-use std::io::{self, Read, Write};
+use std::io::{Read, Write};
 use std::vec::Vec;
 use regex::Regex;
 
