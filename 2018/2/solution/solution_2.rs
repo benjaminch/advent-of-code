@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::io::{self, Read, Write};
+use std::io::{Read, Write};
 
 fn main() {
     let mut input = String::new();
