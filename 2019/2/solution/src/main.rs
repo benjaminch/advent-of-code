@@ -1,43 +1,45 @@
-use std::io::{self, Read, Write};
+use std::io::{self, Error, Read, Write};
 use std::vec::Vec;
 
-fn main() {
+fn main() -> Result<(), Error> {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
-    let mut instructions: Vec<i32> = get_instructions(&mut input.clone());
 
     // Part 1
-    instructions[1] = 12;
-    instructions[2] = 2;
-    let data: Vec<i32> = execute(instructions);
-    writeln!(io::stdout(), "Part 1, index 0 value: {:?}", data[0]);
+    writeln!(
+        io::stdout(),
+        "Part 1, index 0 value: {:?}",
+        execute(get_instructions(&mut input.clone(), 12, 2))[0]
+    )?;
 
     // Part 2
     for noun in 0..100 {
         for verb in 0..100 {
-            let mut instructions2: Vec<i32> = get_instructions(&mut input.clone());
-            instructions2[1] = noun;
-            instructions2[2] = verb;
-            let data2: Vec<i32> = execute(instructions2);
-            // println!("{} {} {}", noun, verb, data2[0]);
-            if data2[0] == 19690720 {
+            if execute(get_instructions(&mut input.clone(), noun, verb))[0] == 19690720 {
                 writeln!(
                     io::stdout(),
                     "Part 2 (100 * noun + verb): {:?}",
                     ((100 * noun) + verb)
-                );
+                )?;
                 break;
             }
         }
     }
+
+    return Ok(());
 }
 
-fn get_instructions(input: &mut String) -> Vec<i32> {
+fn get_instructions(input: &mut String, noun: i32, verb: i32) -> Vec<i32> {
     input.retain(|c| !c.is_whitespace());
-    return input
+    let mut instructions: Vec<i32> = input
         .split(",")
         .flat_map(|e| e.parse::<i32>())
         .collect::<Vec<i32>>();
+
+    instructions[1] = noun;
+    instructions[2] = verb;
+
+    return instructions;
 }
 
 fn execute(data: Vec<i32>) -> Vec<i32> {
