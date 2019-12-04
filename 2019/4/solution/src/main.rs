@@ -39,8 +39,8 @@ fn find_matching_passwords(from: u32, to: u32, exactly_two_adjacent_digits: bool
             if from_digits[i] > from_digits[i + 1] && digit_to_set.is_none() {
                 digit_to_set = Some(from_digits[i]);
             }
-            if digit_to_set.is_some() {
-                from_digits[i + 1] = digit_to_set.unwrap();
+            if let Some(digit) = digit_to_set {
+                from_digits[i + 1] = digit;
             }
         }
         current = to_number(&from_digits);
@@ -68,7 +68,7 @@ fn find_matching_passwords(from: u32, to: u32, exactly_two_adjacent_digits: bool
     passwords
 }
 
-fn to_number(digits: &Vec<u8>) -> u32 {
+fn to_number(digits: &[u8]) -> u32 {
     digits
         .iter()
         .map(|e| e.to_string())
