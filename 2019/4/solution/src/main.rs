@@ -6,70 +6,91 @@ fn main() -> Result<(), Error> {
     io::stdin().read_to_string(&mut input).unwrap();
 
     let mut lines = input.lines();
-    let passwords: Vec<u32> = compute_passwords(lines.next().unwrap().to_string());
+    let bounds: Vec<u32> = extract_bounds(lines.next().unwrap().to_string());
 
-    // Part 1
-    let matching_passwords: u32 = passwords.iter()
-        .filter(|p| password_matches(**p, false))
+    // Part 1 
+    let matching_passwords: u32 =
+        find_matching_passwords(bounds[0], bounds[1], false)
+        .iter()
         .count() as u32;
     writeln!(io::stdout(), "Matching passwords: {}", matching_passwords)?;
 
     // Part 2
-    let matching_passwords2: u32 = passwords.iter()
-        .filter(|p| password_matches(**p, true))
+    let matching_passwords2: u32 =
+        find_matching_passwords(bounds[0], bounds[1], true)
+        .iter()
         .count() as u32;
     writeln!(io::stdout(), "Matching passwords (part 2): {}", matching_passwords2)?;
 
     return Ok(());
 }
 
-fn compute_passwords(input: String) -> Vec<u32> {
-    let input_split: Vec<&str> = input.split("-").collect::<Vec<&str>>();
-    let min: u32 = input_split[0].parse::<u32>().unwrap();
-    let max: u32 = input_split[1].parse::<u32>().unwrap();
+fn find_matching_passwords(from: u32, to: u32, exactly_two_adjacent_digits: bool) -> Vec<u32> {
     let mut passwords: Vec<u32> = Vec::new();
-    for p in min..max+1 {
-        passwords.push(p);
+
+    // Generate only passwords
+    // - having increasing digits from left to right
+    // - having two adjacent digits
+    // - (eventually having adjacent digits not part of bigger group)
+    let mut current: u32 = from;
+    while current <= to {
+        let mut from_digits: Vec<u8> = to_digits(current);
+        let mut digit_to_set: Option<u8> = None;
+        for i in 0..from_digits.len() - 1 {
+            if from_digits[i] > from_digits[i+1] {
+                if digit_to_set.is_none() {
+                    digit_to_set = Some(from_digits[i]);
+                }
+            }
+            if !digit_to_set.is_none() {
+                from_digits[i+1] = digit_to_set.unwrap();
+            }
+        }
+        current = to_number(&from_digits);
+        if current > to {
+            break;
+        }
+
+        let mut has_two_adjacent_digits: bool = false;
+        let mut same = HashMap::<u8, usize>::new();
+        for i in 1..from_digits.len() {
+            if from_digits[i-1] == from_digits[i] {
+                has_two_adjacent_digits = true;
+                *same.entry(from_digits[i-1]).or_default() += 1;
+            }
+        }
+
+        if (!exactly_two_adjacent_digits && has_two_adjacent_digits)
+            || (exactly_two_adjacent_digits && same.iter().filter(|x| *x.1 == 1).count() > 0) {
+            passwords.push(current);
+        }
+
+        current += 1;
     }
     return passwords;
 }
 
-fn password_matches(input: u32, exactly_two_adjacent_digits: bool) -> bool {
-    let password: Vec<u32> = input
+fn to_number(digits: &Vec<u8>) -> u32 {
+    return digits
+        .iter()
+        .map(|e| e.to_string())
+        .collect::<Vec<String>>()
+        .join("")
+        .parse::<u32>()
+        .unwrap();
+}
+
+fn to_digits(number: u32) -> Vec<u8> {
+    return number
         .to_string()
         .chars()
-        .map(|e| e.to_string().parse::<u32>().unwrap())
-        .collect::<Vec<u32>>();
-    // It is a six-digit number.
-    if password.len() != 6 {
-        return false;
-    }
-    let mut has_two_adjacent_digits: bool = false;
-    let mut left_to_right_never_decreases: bool = true;
-    let mut same = HashMap::<u32, usize>::new();
-    for i in 1..password.len() {
-        if password[i-1] == password[i] {
-            has_two_adjacent_digits = true;
-            *same.entry(password[i]).or_default() += 1;
-        }
-        if password[i-1] > password[i] {
-            left_to_right_never_decreases = false;
-        }
-    }
-    // Two adjacent digits are the same (like 22 in 122345).
-    if !has_two_adjacent_digits {
-        return false;
-    }
-    // Going from left to right, the digits never decrease; they only ever increase or stay the same (like 111123 or 135679)
-    if !left_to_right_never_decreases {
-        return false;
-    }
-    // Part 2
-    // two adjacent matching digits are not part of a larger group of matching digits
-    if exactly_two_adjacent_digits
-        && same.iter().filter(|x| *x.1 == 1).count() == 0 {
-        return false;
-    }
+        .map(|e| e.to_string().parse::<u8>().unwrap())
+        .collect::<Vec<u8>>();
+}
 
-    return true;
+fn extract_bounds(input: String) -> Vec<u32> {
+    let input_split: Vec<&str> = input.split("-").collect::<Vec<&str>>();
+    let min: u32 = input_split[0].parse::<u32>().unwrap();
+    let max: u32 = input_split[1].parse::<u32>().unwrap();
+    return vec![min, max];
 }
