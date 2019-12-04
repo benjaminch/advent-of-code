@@ -27,15 +27,12 @@ fn main() -> Result<(), Error> {
 
 fn find_matching_passwords(from: u32, to: u32, exactly_two_adjacent_digits: bool) -> Vec<u32> {
     let mut passwords: Vec<u32> = Vec::new();
-
-    // Generate only passwords
-    // - having increasing digits from left to right
-    // - having two adjacent digits
-    // - (eventually having adjacent digits not part of bigger group)
     let mut current: u32 = from;
     while current <= to {
         let mut from_digits: Vec<u8> = to_digits(current);
         let mut digit_to_set: Option<u8> = None;
+
+        // Initialize making digits from left to right increasing
         for i in 0..from_digits.len() - 1 {
             if from_digits[i] > from_digits[i+1] {
                 if digit_to_set.is_none() {
