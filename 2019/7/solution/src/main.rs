@@ -10,11 +10,12 @@ fn main() -> Result<(), Error> {
     writeln!(io::stdout(), "Max signal {}", max_signal(input.clone()))?;
 
     // Part 2
+    writeln!(io::stdout(), "Max signal v2 {}", max_signal_v2(input.clone()))?;
 
     return Ok(());
 }
 
-fn max_signal(code: String) -> i32 {
+fn max_signal(code: String) -> i64 {
     return (0..5)
         .permutations(5)
         .map(|amplifiers_phases| {
@@ -24,38 +25,87 @@ fn max_signal(code: String) -> i32 {
         .unwrap();
 }
 
-fn compute_signal(amplifiers_phase: Vec<i32>, code: String) -> i32 {
-    let mut input: i32 = 0;
+fn compute_signal(amplifiers_phase: Vec<i64>, code: String) -> i64 {
+    let mut input: i64 = 0;
     let data = get_instructions(&mut code.clone());
     for phase in amplifiers_phase {
-        let (d, output) = execute(data.clone(), &mut vec![input, phase], input);
+        let (d, output, is_terminated, _code_pointer) = execute(data.clone(), &mut vec![input, phase], input, None);
         input = output.unwrap();
     }
     return input;
 }
 
-fn get_instructions(input: &mut String) -> Vec<i32> {
+fn max_signal_v2(code: String) -> i64 {
+    return (5..10)
+        .permutations(5)
+        .map(|amplifiers_phases| {
+            return compute_signal_v2(amplifiers_phases.clone(), code.clone());
+        })
+        .max()
+        .unwrap();
+}
+
+fn compute_signal_v2(amplifiers_phase: Vec<i64>, code: String) -> i64 {
+    let mut input: i64 = 0;
+    let data = get_instructions(&mut code.clone());
+    let mut is_last_loop: bool = false;
+
+    let mut amplifiers_data: Vec<Vec<i64>> = Vec::new();
+    let mut amplifiers_outputs: Vec<i64> = vec![0; amplifiers_phase.len()];
+    let mut amplifiers_code_pointers: Vec<Option<usize>> = vec![None; amplifiers_phase.len()];
+    for i in (0..amplifiers_phase.len()) {
+        amplifiers_data.push(data.clone());
+    }
+
+    let mut loops = 1;
+    while !is_last_loop {
+        let mut amplifier_number: usize = 0;
+        for phase in amplifiers_phase.clone() {
+            if amplifier_number > 0 {
+                input = *amplifiers_outputs.get(amplifier_number -1).unwrap_or_else(|| &input);
+            }
+            let (d, output, is_terminated, code_pointer) = execute(amplifiers_data[amplifier_number].clone(), &mut vec![input, phase], input, amplifiers_code_pointers[amplifier_number]);
+            if output.is_some() {
+                amplifiers_outputs[amplifier_number] = output.unwrap();
+            }
+            amplifiers_code_pointers[amplifier_number] = Some(code_pointer);
+            amplifiers_data[amplifier_number] = d;
+            if is_terminated {
+                println!("{} TERMINATED => {:?}", amplifier_number, amplifiers_outputs);
+                is_last_loop = true;
+            }
+            amplifier_number += 1;
+        }
+
+        loops += 1;
+    }
+    return input;
+}
+
+fn get_instructions(input: &mut String) -> Vec<i64> {
     input.retain(|c| !c.is_whitespace());
     return input
         .split(",")
-        .flat_map(|e| e.parse::<i32>())
-        .collect::<Vec<i32>>();
+        .flat_map(|e| e.parse::<i64>())
+        .collect::<Vec<i64>>();
 }
 
 fn execute(
-    data: Vec<i32>,
-    user_inputs: &mut Vec<i32>,
-    default_input: i32,
-) -> (Vec<i32>, Option<i32>) {
-    let mut instructions: Vec<i32> = data.clone();
+    data: Vec<i64>,
+    user_inputs: &mut Vec<i64>,
+    default_input: i64,
+    code_pointer: Option<usize> 
+) -> (Vec<i64>, Option<i64>, bool, usize) {
+    let mut instructions: Vec<i64> = data.clone();
     let instructions_len: usize = instructions.len();
-    let mut output: Option<i32> = None;
-    let mut index: usize = 0;
+    let mut output: Option<i64> = None;
+    let mut is_terminated = false;
+    let mut index: usize = code_pointer.unwrap_or_else(|| 0);
 
     while index < instructions_len {
         let (operator, inputs_count, mut inputs_modes): (Operation, usize, Vec<ParameterMode>) =
-            get_operation(*instructions.get(index).unwrap() as i32).unwrap();
-        let raw_instruction: Vec<i32> = instructions[index..(index + inputs_count)].to_vec();
+            get_operation(*instructions.get(index).unwrap() as i64).unwrap();
+        let raw_instruction: Vec<i64> = instructions[index..(index + inputs_count)].to_vec();
         let mut instruction: Instruction = Instruction {
             operator: operator,
             input_1_index: *raw_instruction.get(1).unwrap_or_else(|| &0),
@@ -72,25 +122,27 @@ fn execute(
         };
         let (should_stop_processing, next_index) =
             execute_instruction(&mut instruction, &mut instructions);
-        if instruction.output.is_some() {
-            output = instruction.output;
-        }
-        if should_stop_processing {
-            break;
-        }
         if next_index.is_none() {
             index += inputs_count;
         } else {
             index = next_index.unwrap() as usize;
         }
+        if instruction.output.is_some() {
+            output = instruction.output;
+            break;
+        }
+        if should_stop_processing {
+            is_terminated = true;
+            break;
+        }
     }
 
-    return (instructions, output);
+    return (instructions, output, is_terminated, index);
 }
 
-fn execute_instruction(instruction: &mut Instruction, data: &mut Vec<i32>) -> (bool, Option<i32>) {
-    let input_1: i32;
-    let input_2: i32;
+fn execute_instruction(instruction: &mut Instruction, data: &mut Vec<i64>) -> (bool, Option<i64>) {
+    let input_1: i64;
+    let input_2: i64;
 
     match instruction.input_1_parameter_mode {
         ParameterMode::Position => {
@@ -142,21 +194,21 @@ fn execute_instruction(instruction: &mut Instruction, data: &mut Vec<i32>) -> (b
             }
         }
         Operation::LessThan => {
-            data[instruction.result_index as usize] = (input_1 < input_2) as i32;
+            data[instruction.result_index as usize] = (input_1 < input_2) as i64;
             (false, None)
         }
         Operation::Equals => {
-            data[instruction.result_index as usize] = (input_1 == input_2) as i32;
+            data[instruction.result_index as usize] = (input_1 == input_2) as i64;
             (false, None)
         }
         Operation::Stop => (true, None),
     };
 }
 
-fn get_operation(input: i32) -> Option<(Operation, usize, Vec<ParameterMode>)> {
+fn get_operation(input: i64) -> Option<(Operation, usize, Vec<ParameterMode>)> {
     let picks: usize;
     let operation: Operation;
-    let mut computed_input: i32 = input;
+    let mut computed_input: i64 = input;
 
     // instruction
     match computed_input % 100 {
@@ -211,7 +263,7 @@ fn get_operation(input: i32) -> Option<(Operation, usize, Vec<ParameterMode>)> {
     return Some((operation, picks, inputs_modes));
 }
 
-fn get_parameter_mode(input: i32) -> Option<ParameterMode> {
+fn get_parameter_mode(input: i64) -> Option<ParameterMode> {
     match input {
         0 => Some(ParameterMode::Position),
         1 => Some(ParameterMode::Immediate),
@@ -241,18 +293,18 @@ enum ParameterMode {
 #[derive(Debug)]
 struct Instruction {
     operator: Operation,
-    input_1_index: i32,
+    input_1_index: i64,
     input_1_parameter_mode: ParameterMode,
-    input_2_index: i32,
+    input_2_index: i64,
     input_2_parameter_mode: ParameterMode,
-    user_input: i32,
+    user_input: i64,
     result_index: usize,
-    output: Option<i32>,
+    output: Option<i64>,
 }
 
 #[derive(Debug)]
 struct Amplifier {
-    input: i32,
-    output: i32,
-    phase: i32,
+    input: i64,
+    output: i64,
+    phase: i64,
 }
