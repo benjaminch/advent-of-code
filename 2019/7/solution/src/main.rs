@@ -1,5 +1,7 @@
 use itertools::Itertools;
 use std::collections::HashMap;
+use std::collections::VecDeque;
+use std::io::stdout;
 use std::io::{self, Error, Read, Write};
 
 fn main() -> Result<(), Error> {
@@ -10,7 +12,11 @@ fn main() -> Result<(), Error> {
     writeln!(io::stdout(), "Max signal {}", max_signal(input.clone()))?;
 
     // Part 2
-    writeln!(io::stdout(), "Max signal v2 {}", max_signal_v2(input.clone()))?;
+    writeln!(
+        io::stdout(),
+        "Max signal v2 {}",
+        max_signal_v2(input.clone())
+    )?;
 
     return Ok(());
 }
@@ -29,7 +35,12 @@ fn compute_signal(amplifiers_phase: Vec<i64>, code: String) -> i64 {
     let mut input: i64 = 0;
     let data = get_instructions(&mut code.clone());
     for phase in amplifiers_phase {
-        let (d, output, is_terminated, _code_pointer) = execute(data.clone(), &mut vec![input, phase], input, None);
+        let (d, output, is_terminated, _code_pointer) = execute(
+            data.clone(),
+            &mut VecDeque::from(vec![phase, input]),
+            input,
+            None,
+        );
         input = output.unwrap();
     }
     return input;
@@ -53,33 +64,50 @@ fn compute_signal_v2(amplifiers_phase: Vec<i64>, code: String) -> i64 {
     let mut amplifiers_data: Vec<Vec<i64>> = Vec::new();
     let mut amplifiers_outputs: Vec<i64> = vec![0; amplifiers_phase.len()];
     let mut amplifiers_code_pointers: Vec<Option<usize>> = vec![None; amplifiers_phase.len()];
+    let mut amplifiers_inputs: Vec<VecDeque<i64>> = vec![VecDeque::new(); amplifiers_phase.len()];
+
     for i in (0..amplifiers_phase.len()) {
         amplifiers_data.push(data.clone());
+        amplifiers_inputs[i].push_back(amplifiers_phase[i as usize]);
     }
 
-    let mut loops = 1;
+    amplifiers_inputs[0].push_back(0);
+
+    let mut loop_n: i32 = 1;
+
     while !is_last_loop {
         let mut amplifier_number: usize = 0;
         for phase in amplifiers_phase.clone() {
-            if amplifier_number > 0 {
-                input = *amplifiers_outputs.get(amplifier_number -1).unwrap_or_else(|| &input);
-            }
-            let (d, output, is_terminated, code_pointer) = execute(amplifiers_data[amplifier_number].clone(), &mut vec![input, phase], input, amplifiers_code_pointers[amplifier_number]);
-            if output.is_some() {
-                amplifiers_outputs[amplifier_number] = output.unwrap();
-            }
+            let default_input: i64 = *amplifiers_inputs[amplifier_number]
+                .back()
+                .unwrap_or_else(|| &0);
+            let inputs_debug = amplifiers_inputs[amplifier_number].clone();
+            let (d, output, is_terminated, code_pointer) = execute(
+                amplifiers_data[amplifier_number].clone(),
+                &mut amplifiers_inputs[amplifier_number],
+                default_input,
+                amplifiers_code_pointers[amplifier_number],
+            );
+            let next_amplifier_number = if amplifier_number < amplifiers_inputs.len() - 1 {
+                amplifier_number + 1
+            } else {
+                0
+            };
+            // TODO: shame clean this mess
+            // introduce a proper / clean amplifier context
+            amplifiers_inputs[next_amplifier_number].push_back(output.unwrap_or_else(|| 0));
+            amplifiers_outputs[amplifier_number] = output.unwrap_or_else(|| 0);
             amplifiers_code_pointers[amplifier_number] = Some(code_pointer);
             amplifiers_data[amplifier_number] = d;
             if is_terminated {
-                println!("{} TERMINATED => {:?}", amplifier_number, amplifiers_outputs);
                 is_last_loop = true;
+                break;
             }
             amplifier_number += 1;
         }
-
-        loops += 1;
+        loop_n += 1;
     }
-    return input;
+    return *amplifiers_outputs.last().unwrap();
 }
 
 fn get_instructions(input: &mut String) -> Vec<i64> {
@@ -92,9 +120,9 @@ fn get_instructions(input: &mut String) -> Vec<i64> {
 
 fn execute(
     data: Vec<i64>,
-    user_inputs: &mut Vec<i64>,
+    user_inputs: &mut VecDeque<i64>,
     default_input: i64,
-    code_pointer: Option<usize> 
+    code_pointer: Option<usize>,
 ) -> (Vec<i64>, Option<i64>, bool, usize) {
     let mut instructions: Vec<i64> = data.clone();
     let instructions_len: usize = instructions.len();
@@ -116,7 +144,7 @@ fn execute(
             input_2_parameter_mode: inputs_modes
                 .pop()
                 .unwrap_or_else(|| ParameterMode::Position),
-            user_input: user_inputs.pop().unwrap_or_else(|| default_input),
+            user_input: user_inputs.pop_front().unwrap_or_else(|| default_input),
             result_index: *raw_instruction.get(3).unwrap_or_else(|| &0) as usize,
             output: None,
         };
@@ -176,7 +204,7 @@ fn execute_instruction(instruction: &mut Instruction, data: &mut Vec<i64>) -> (b
             (false, None)
         }
         Operation::Output => {
-            instruction.output = Some(data[instruction.input_1_index as usize]);
+            instruction.output = Some(input_1);
             (false, None)
         }
         Operation::JumpIfTrue => {
@@ -246,7 +274,7 @@ fn get_operation(input: i64) -> Option<(Operation, usize, Vec<ParameterMode>)> {
         }
         99 => {
             operation = Operation::Stop;
-            picks = 0;
+            picks = 1;
         }
         _ => {
             return None;
@@ -300,11 +328,4 @@ struct Instruction {
     user_input: i64,
     result_index: usize,
     output: Option<i64>,
-}
-
-#[derive(Debug)]
-struct Amplifier {
-    input: i64,
-    output: i64,
-    phase: i64,
 }
