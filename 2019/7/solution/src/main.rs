@@ -1,7 +1,7 @@
 use itertools::Itertools;
-use std::collections::HashMap;
+
 use std::collections::VecDeque;
-use std::io::stdout;
+
 use std::io::{self, Error, Read, Write};
 
 fn main() -> Result<(), Error> {
@@ -35,7 +35,7 @@ fn compute_signal(amplifiers_phase: Vec<i64>, code: String) -> i64 {
     let mut input: i64 = 0;
     let data = get_instructions(&mut code.clone());
     for phase in amplifiers_phase {
-        let (d, output, is_terminated, _code_pointer) = execute(
+        let (_d, output, _is_terminated, _code_pointer) = execute(
             data.clone(),
             &mut VecDeque::from(vec![phase, input]),
             input,
@@ -57,7 +57,7 @@ fn max_signal_v2(code: String) -> i64 {
 }
 
 fn compute_signal_v2(amplifiers_phase: Vec<i64>, code: String) -> i64 {
-    let mut input: i64 = 0;
+    let _input: i64 = 0;
     let data = get_instructions(&mut code.clone());
     let mut is_last_loop: bool = false;
 
@@ -66,7 +66,7 @@ fn compute_signal_v2(amplifiers_phase: Vec<i64>, code: String) -> i64 {
     let mut amplifiers_code_pointers: Vec<Option<usize>> = vec![None; amplifiers_phase.len()];
     let mut amplifiers_inputs: Vec<VecDeque<i64>> = vec![VecDeque::new(); amplifiers_phase.len()];
 
-    for i in (0..amplifiers_phase.len()) {
+    for i in 0..amplifiers_phase.len() {
         amplifiers_data.push(data.clone());
         amplifiers_inputs[i].push_back(amplifiers_phase[i as usize]);
     }
@@ -77,11 +77,11 @@ fn compute_signal_v2(amplifiers_phase: Vec<i64>, code: String) -> i64 {
 
     while !is_last_loop {
         let mut amplifier_number: usize = 0;
-        for phase in amplifiers_phase.clone() {
+        for _phase in amplifiers_phase.clone() {
             let default_input: i64 = *amplifiers_inputs[amplifier_number]
                 .back()
                 .unwrap_or_else(|| &0);
-            let inputs_debug = amplifiers_inputs[amplifier_number].clone();
+            let _inputs_debug = amplifiers_inputs[amplifier_number].clone();
             let (d, output, is_terminated, code_pointer) = execute(
                 amplifiers_data[amplifier_number].clone(),
                 &mut amplifiers_inputs[amplifier_number],
