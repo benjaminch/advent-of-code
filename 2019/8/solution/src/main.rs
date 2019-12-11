@@ -9,9 +9,9 @@ fn main() -> Result<(), Error> {
         .chars()
         .map(|c| c.to_string().parse::<i32>().unwrap())
         .collect::<Vec<i32>>();
+    let image: Image = build_image(&input_pixels.clone(), 25, 6);
 
     // Part 1
-    let image: Image = build_image(&input_pixels.clone(), 25, 6);
     let (layer_having_fewest_0, _count_0): (usize, i32) =
         find_layer_having_fewest(0, &image).unwrap();
     let count_1_in_that_layer: i32 = count_in_layer(1, layer_having_fewest_0, &image);
@@ -24,6 +24,7 @@ fn main() -> Result<(), Error> {
     )?;
 
     // Part 2
+    write!(io::stdout(), "Message:\n{}", merge_layers(&image),)?;
 
     return Ok(());
 }
@@ -57,6 +58,34 @@ fn find_layer_having_fewest(input: i32, image: &Image) -> Option<(usize, i32)> {
     return min_layer;
 }
 
+fn merge_layers(image: &Image) -> Image {
+    let mut result_pixels: Vec<i32> = vec![0; image.width * image.height];
+
+    for i in 0..image.width * image.height {
+        result_pixels[i] = get_pixel_value(i, image).unwrap();
+    }
+
+    return build_image(&result_pixels, image.width, image.height);
+}
+
+fn get_pixel_value(position: usize, image: &Image) -> Option<i32> {
+    if position > image.width * image.height {
+        return None;
+    }
+
+    let mut pixel_index: usize = position;
+
+    while pixel_index < image.pixels.len() {
+        if image.pixels[pixel_index] != 2 {
+            // not transparent
+            return Some(image.pixels[pixel_index]);
+        }
+        pixel_index += image.width * image.height;
+    }
+
+    return None;
+}
+
 fn build_image(input_pixels: &Vec<i32>, width: usize, height: usize) -> Image {
     return Image {
         pixels: input_pixels.clone(),
@@ -72,4 +101,22 @@ struct Image {
     layers_count: usize,
     width: usize,
     height: usize,
+}
+
+impl std::fmt::Display for Image {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        let mut output = String::with_capacity(self.width * self.height + self.height);
+        // prints only first layer
+        for i in 0..(self.width * self.height) {
+            if i % (self.width) == 0 {
+                output.push_str("\n");
+            }
+            output.push_str(match self.pixels[i] {
+                0 => " ",
+                1 => "░",
+                _ => " ",
+            });
+        }
+        write!(f, "{}", output)
+    }
 }
