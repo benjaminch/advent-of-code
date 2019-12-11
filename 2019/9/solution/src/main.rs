@@ -9,6 +9,11 @@ fn main() -> Result<(), Error> {
     io::stdin().read_to_string(&mut input).unwrap();
 
     // Part 1
+    let (_instructions, output, _is_terminated, _index) = execute(get_instructions(&mut input.clone()), &mut VecDeque::new(), 1, None);
+    writeln!(
+        io::stdout(),
+        "Part 1: OUTPUT = {:?}",
+        output)?;
 
     // Part 2
 
@@ -28,12 +33,16 @@ fn execute(
     user_inputs: &mut VecDeque<i64>,
     default_input: i64,
     code_pointer: Option<usize>,
-) -> (Vec<i64>, Option<i64>, bool, usize) {
+) -> (Vec<i64>, Vec<i64>, bool, usize) {
     let mut instructions: Vec<i64> = data.clone();
     let instructions_len: usize = instructions.len();
-    let mut output: Option<i64> = None;
+    let mut output: Vec<i64> = Vec::new();
     let mut is_terminated = false;
     let mut index: usize = code_pointer.unwrap_or_else(|| 0);
+    let mut relative_base: i64 = 0;
+
+    // make memory way bigger more than program (x10)
+    instructions.append(&mut vec![0; instructions_len * 10]);
 
     while index < instructions_len {
         let (operator, inputs_count, mut inputs_modes): (Operation, usize, Vec<ParameterMode>) =
@@ -54,15 +63,14 @@ fn execute(
             output: None,
         };
         let (should_stop_processing, next_index) =
-            execute_instruction(&mut instruction, index, &mut instructions);
+            execute_instruction(&mut instruction, &mut relative_base, &mut instructions);
         if next_index.is_none() {
             index += inputs_count;
         } else {
             index = next_index.unwrap() as usize;
         }
-        if instruction.output.is_some() {
-            output = instruction.output;
-            break;
+        if let Some(out) = instruction.output {
+            output.push(out);
         }
         if should_stop_processing {
             is_terminated = true;
@@ -73,7 +81,7 @@ fn execute(
     return (instructions, output, is_terminated, index);
 }
 
-fn execute_instruction(instruction: &mut Instruction, code_pointer: usize, data: &mut Vec<i64>) -> (bool, Option<i64>) {
+fn execute_instruction(instruction: &mut Instruction, relative_base: &mut i64, data: &mut Vec<i64>) -> (bool, Option<i64>) {
     let input_1: i64;
     let input_2: i64;
 
@@ -85,7 +93,7 @@ fn execute_instruction(instruction: &mut Instruction, code_pointer: usize, data:
             input_1 = instruction.input_1_index;
         }
         ParameterMode::Relative => {
-            input_1 = data[code_pointer + instruction.input_1_index as usize];
+            input_1 = data[(*relative_base + instruction.input_1_index) as usize];
         }
     }
 
@@ -97,7 +105,7 @@ fn execute_instruction(instruction: &mut Instruction, code_pointer: usize, data:
             input_2 = instruction.input_2_index;
         }
         ParameterMode::Relative => {
-            input_2 = data[code_pointer + instruction.input_2_index as usize];
+            input_2 = data[(*relative_base + instruction.input_2_index) as usize];
         }
     }
 
@@ -111,7 +119,7 @@ fn execute_instruction(instruction: &mut Instruction, code_pointer: usize, data:
             (false, None)
         }
         Operation::Input => {
-            data[instruction.input_1_index as usize] = instruction.user_input;
+            data[input_1 as usize] = instruction.user_input;
             (false, None)
         }
         Operation::Output => {
@@ -138,6 +146,11 @@ fn execute_instruction(instruction: &mut Instruction, code_pointer: usize, data:
         }
         Operation::Equals => {
             data[instruction.result_index as usize] = (input_1 == input_2) as i64;
+            (false, None)
+        }
+        Operation::AdjustRelativeBase => {
+            let new_relative_base: i64 = input_1;
+            *relative_base += new_relative_base;
             (false, None)
         }
         Operation::Stop => (true, None),
@@ -183,6 +196,10 @@ fn get_operation(input: i64) -> Option<(Operation, usize, Vec<ParameterMode>)> {
             operation = Operation::Equals;
             picks = 4;
         }
+        9 => {
+            operation = Operation::AdjustRelativeBase;
+            picks = 2;
+        }
         99 => {
             operation = Operation::Stop;
             picks = 1;
@@ -221,6 +238,7 @@ enum Operation {
     JumpIfFalse = 6,
     LessThan = 7,
     Equals = 8,
+    AdjustRelativeBase = 9,
     Stop = 99,
 }
 
