@@ -1,4 +1,4 @@
-use itertools::Itertools;
+
 
 use std::collections::VecDeque;
 
@@ -9,11 +9,13 @@ fn main() -> Result<(), Error> {
     io::stdin().read_to_string(&mut input).unwrap();
 
     // Part 1
-    let (_instructions, output, _is_terminated, _index) = execute(get_instructions(&mut input.clone()), &mut VecDeque::new(), 1, None);
-    writeln!(
-        io::stdout(),
-        "Part 1: OUTPUT = {:?}",
-        output)?;
+    let (_instructions, output, _is_terminated, _index) = execute(
+        get_instructions(&mut input.clone()),
+        &mut VecDeque::new(),
+        1,
+        None,
+    );
+    writeln!(io::stdout(), "Part 1: OUTPUT = {:?}", output)?;
 
     // Part 2
 
@@ -42,6 +44,7 @@ fn execute(
     let mut relative_base: i64 = 0;
 
     // make memory way bigger more than program (x10)
+    // TODO: dynamically allocate it if needs to be accessed
     instructions.append(&mut vec![0; instructions_len * 10]);
 
     while index < instructions_len {
@@ -59,7 +62,10 @@ fn execute(
                 .pop()
                 .unwrap_or_else(|| ParameterMode::Position),
             user_input: user_inputs.pop_front().unwrap_or_else(|| default_input),
-            result_index: *raw_instruction.get(3).unwrap_or_else(|| &0) as usize,
+            result_index: *raw_instruction.get(3).unwrap_or_else(|| &0),
+            result_parameter_mode: inputs_modes
+                .pop()
+                .unwrap_or_else(|| ParameterMode::Position),
             output: None,
         };
         let (should_stop_processing, next_index) =
@@ -81,75 +87,103 @@ fn execute(
     return (instructions, output, is_terminated, index);
 }
 
-fn execute_instruction(instruction: &mut Instruction, relative_base: &mut i64, data: &mut Vec<i64>) -> (bool, Option<i64>) {
-    let input_1: i64;
-    let input_2: i64;
-
+fn execute_instruction(
+    instruction: &mut Instruction,
+    relative_base: &mut i64,
+    data: &mut Vec<i64>,
+) -> (bool, Option<i64>) {
+    let input_1_read: i64;
+    let input_1_write: i64;
     match instruction.input_1_parameter_mode {
         ParameterMode::Position => {
-            input_1 = data[instruction.input_1_index as usize];
+            input_1_read = data[instruction.result_index as usize];
+            input_1_write = instruction.result_index;
         }
         ParameterMode::Immediate => {
-            input_1 = instruction.input_1_index;
+            input_1_read = instruction.input_1_index;
+            input_1_write = instruction.input_1_index;
         }
         ParameterMode::Relative => {
-            input_1 = data[(*relative_base + instruction.input_1_index) as usize];
+            input_1_read = data[(*relative_base + instruction.input_1_index) as usize];
+            input_1_write = *relative_base + instruction.input_1_index;
         }
     }
 
+    let input_2_read: i64;
+    let input_2_write: i64;
     match instruction.input_2_parameter_mode {
         ParameterMode::Position => {
-            input_2 = data[instruction.input_2_index as usize];
+            input_2_read = data[instruction.input_2_index as usize];
+            input_2_write = instruction.input_2_index;
         }
         ParameterMode::Immediate => {
-            input_2 = instruction.input_2_index;
+            input_2_read = instruction.input_2_index;
+            input_2_write = instruction.input_2_index;
         }
         ParameterMode::Relative => {
-            input_2 = data[(*relative_base + instruction.input_2_index) as usize];
+            input_2_read = data[(*relative_base + instruction.input_2_index) as usize];
+            input_2_write = *relative_base + instruction.input_2_index;
+        }
+    }
+
+    let result_read: i64;
+    let result_write: i64;
+    match instruction.result_parameter_mode {
+        ParameterMode::Relative => {
+            result_read = data[(*relative_base + instruction.result_index) as usize];
+            result_write = *relative_base + instruction.result_index;
+        }
+        _ => {
+            result_read = data[instruction.result_index as usize];
+            result_write = instruction.result_index;
         }
     }
 
     return match instruction.operator {
         Operation::Add => {
-            data[instruction.result_index as usize] = input_1 + input_2;
+            data[result_write as usize] = input_1_read + input_2_read;
             (false, None)
         }
         Operation::Multiply => {
-            data[instruction.result_index as usize] = input_1 * input_2;
+            println!("INS: {:?}", instruction);
+            data[result_write as usize] = input_1_read * input_2_read;
+            println!("result_write {}, input_1_read {}, input_2_read {}, * {}, result {}", result_write, input_1_read, input_2_read, input_1_read * input_2_read, data[result_write as usize]);
             (false, None)
         }
         Operation::Input => {
-            data[input_1 as usize] = instruction.user_input;
+            println!("INPUT MODE: {:?}", instruction.input_1_parameter_mode);
+            println!("INS: {:?}", instruction);
+            data[input_1_write as usize] = instruction.user_input;
             (false, None)
         }
         Operation::Output => {
-            instruction.output = Some(input_1);
+            instruction.output = Some(input_1_read);
             (false, None)
         }
         Operation::JumpIfTrue => {
-            if input_1 != 0 {
-                (false, Some(input_2))
+            if input_1_read != 0 {
+                (false, Some(input_2_read))
             } else {
                 (false, None)
             }
         }
         Operation::JumpIfFalse => {
-            if input_1 == 0 {
-                (false, Some(input_2))
+            if input_1_read == 0 {
+                (false, Some(input_2_read))
             } else {
                 (false, None)
             }
         }
         Operation::LessThan => {
-            data[instruction.result_index as usize] = (input_1 < input_2) as i64;
+            data[result_write as usize] = (input_1_read < input_2_read) as i64;
             (false, None)
         }
         Operation::Equals => {
-            data[instruction.result_index as usize] = (input_1 == input_2) as i64;
+            data[result_write as usize] = (input_1_read == input_2_read) as i64;
             (false, None)
         }
         Operation::AdjustRelativeBase => {
-            let new_relative_base: i64 = input_1;
+            let new_relative_base: i64 = input_1_read;
             *relative_base += new_relative_base;
             (false, None)
         }
@@ -212,6 +246,7 @@ fn get_operation(input: i64) -> Option<(Operation, usize, Vec<ParameterMode>)> {
     // params
     computed_input /= 100;
     let inputs_modes = vec![
+        get_parameter_mode((computed_input / 100) % 10).unwrap(),
         get_parameter_mode((computed_input / 10) % 10).unwrap(),
         get_parameter_mode(computed_input % 10).unwrap(),
     ];
@@ -257,6 +292,7 @@ struct Instruction {
     input_2_index: i64,
     input_2_parameter_mode: ParameterMode,
     user_input: i64,
-    result_index: usize,
+    result_index: i64,
+    result_parameter_mode: ParameterMode,
     output: Option<i64>,
 }
