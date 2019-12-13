@@ -16,6 +16,13 @@ fn main() -> Result<(), Error> {
     writeln!(io::stdout(), "Part 1: OUTPUT = {:?}", output)?;
 
     // Part 2
+    let (_instructions, output, _is_terminated, _index) = execute(
+        get_instructions(&mut input.clone()),
+        &mut VecDeque::new(),
+        2,
+        None,
+    );
+    writeln!(io::stdout(), "Part 2: OUTPUT = {:?}", output)?;
 
     return Ok(());
 }
