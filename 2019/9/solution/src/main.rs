@@ -1,5 +1,3 @@
-
-
 use std::collections::VecDeque;
 
 use std::io::{self, Error, Read, Write};
@@ -62,7 +60,7 @@ fn execute(
                 .pop()
                 .unwrap_or_else(|| ParameterMode::Position),
             user_input: user_inputs.pop_front().unwrap_or_else(|| default_input),
-            result_index: *raw_instruction.get(3).unwrap_or_else(|| &0),
+            input_3_index: *raw_instruction.get(3).unwrap_or_else(|| &0),
             result_parameter_mode: inputs_modes
                 .pop()
                 .unwrap_or_else(|| ParameterMode::Position),
@@ -92,12 +90,13 @@ fn execute_instruction(
     relative_base: &mut i64,
     data: &mut Vec<i64>,
 ) -> (bool, Option<i64>) {
+    // TODO: extract in a function
     let input_1_read: i64;
     let input_1_write: i64;
     match instruction.input_1_parameter_mode {
         ParameterMode::Position => {
-            input_1_read = data[instruction.result_index as usize];
-            input_1_write = instruction.result_index;
+            input_1_read = data[instruction.input_1_index as usize];
+            input_1_write = instruction.input_1_index;
         }
         ParameterMode::Immediate => {
             input_1_read = instruction.input_1_index;
@@ -126,33 +125,29 @@ fn execute_instruction(
         }
     }
 
-    let result_read: i64;
-    let result_write: i64;
+    let input_3_read: i64;
+    let input_3_write: i64;
     match instruction.result_parameter_mode {
         ParameterMode::Relative => {
-            result_read = data[(*relative_base + instruction.result_index) as usize];
-            result_write = *relative_base + instruction.result_index;
+            input_3_read = data[(*relative_base + instruction.input_3_index) as usize];
+            input_3_write = *relative_base + instruction.input_3_index;
         }
         _ => {
-            result_read = data[instruction.result_index as usize];
-            result_write = instruction.result_index;
+            input_3_read = data[instruction.input_3_index as usize];
+            input_3_write = instruction.input_3_index;
         }
     }
 
     return match instruction.operator {
         Operation::Add => {
-            data[result_write as usize] = input_1_read + input_2_read;
+            data[input_3_write as usize] = input_1_read + input_2_read;
             (false, None)
         }
         Operation::Multiply => {
-            println!("INS: {:?}", instruction);
-            data[result_write as usize] = input_1_read * input_2_read;
-            println!("result_write {}, input_1_read {}, input_2_read {}, * {}, result {}", result_write, input_1_read, input_2_read, input_1_read * input_2_read, data[result_write as usize]);
+            data[input_3_write as usize] = input_1_read * input_2_read;
             (false, None)
         }
         Operation::Input => {
-            println!("INPUT MODE: {:?}", instruction.input_1_parameter_mode);
-            println!("INS: {:?}", instruction);
             data[input_1_write as usize] = instruction.user_input;
             (false, None)
         }
@@ -175,11 +170,11 @@ fn execute_instruction(
             }
         }
         Operation::LessThan => {
-            data[result_write as usize] = (input_1_read < input_2_read) as i64;
+            data[input_3_write as usize] = (input_1_read < input_2_read) as i64;
             (false, None)
         }
         Operation::Equals => {
-            data[result_write as usize] = (input_1_read == input_2_read) as i64;
+            data[input_3_write as usize] = (input_1_read == input_2_read) as i64;
             (false, None)
         }
         Operation::AdjustRelativeBase => {
@@ -194,7 +189,7 @@ fn execute_instruction(
 fn get_operation(input: i64) -> Option<(Operation, usize, Vec<ParameterMode>)> {
     let picks: usize;
     let operation: Operation;
-    let mut computed_input: i64 = input;
+    let computed_input: i64 = input;
 
     // instruction
     match computed_input % 100 {
@@ -244,11 +239,10 @@ fn get_operation(input: i64) -> Option<(Operation, usize, Vec<ParameterMode>)> {
     }
 
     // params
-    computed_input /= 100;
     let inputs_modes = vec![
+        get_parameter_mode((computed_input / 10000) % 10).unwrap(),
+        get_parameter_mode((computed_input / 1000) % 10).unwrap(),
         get_parameter_mode((computed_input / 100) % 10).unwrap(),
-        get_parameter_mode((computed_input / 10) % 10).unwrap(),
-        get_parameter_mode(computed_input % 10).unwrap(),
     ];
 
     return Some((operation, picks, inputs_modes));
@@ -292,7 +286,7 @@ struct Instruction {
     input_2_index: i64,
     input_2_parameter_mode: ParameterMode,
     user_input: i64,
-    result_index: i64,
+    input_3_index: i64,
     result_parameter_mode: ParameterMode,
     output: Option<i64>,
 }
