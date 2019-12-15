@@ -1,4 +1,3 @@
-
 use std::collections::HashMap;
 use std::io::{self, Error, ErrorKind, Read, Write};
 
@@ -17,14 +16,22 @@ fn main() -> Result<(), Error> {
     return Ok(());
 }
 
+fn vaporize(_asteroid_position: &Position, _asteroids_positions: &Vec<Position>) -> Vec<Position> {
+    let vaporized: Vec<Position> = Vec::new();
+
+    return vaporized;
+}
+
 fn get_detected_asteroids(
     asteroid_position: &Position,
     asteroids_positions: &Vec<Position>,
 ) -> usize {
     let mut detected_asteroids: HashMap<i64, (Position, f32)> = HashMap::new();
 
-    for other_asteroid_position in asteroids_positions.iter().filter(|p| p.asteroid.is_some()) {
-        if other_asteroid_position != asteroid_position {
+    for other_asteroid_position in asteroids_positions.iter() {
+        if other_asteroid_position.asteroid.is_some()
+            && other_asteroid_position != asteroid_position
+        {
             let angle: i64 = (((other_asteroid_position.y as i32 - asteroid_position.y as i32)
                 as f64)
                 .atan2(other_asteroid_position.x as f64 - asteroid_position.x as f64)
@@ -55,7 +62,11 @@ fn get_detected_asteroids(
 fn find_asteroid_detecting_most_asteroids(map: Map) -> Option<PositionDetected> {
     let mut result: Option<PositionDetected> = None;
 
-    for position in map.positions.iter().filter(|p| p.asteroid.is_some()) {
+    for position in map.positions.iter() {
+        if position.asteroid.is_none() {
+            continue;
+        }
+
         let detected_asteroids: usize = get_detected_asteroids(&position, &map.positions);
         if result.is_none() || detected_asteroids > result.as_ref().unwrap().detected {
             result = Some(PositionDetected {
