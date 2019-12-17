@@ -1,6 +1,8 @@
+extern crate float_cmp;
+
+use float_cmp::approx_eq;
 use std::collections::{HashMap, HashSet};
 use std::f64::consts::PI;
-use std::cmp::Ordering;
 use std::io::{self, Error, ErrorKind, Read, Write};
 
 fn main() -> Result<(), Error> {
@@ -8,47 +10,51 @@ fn main() -> Result<(), Error> {
     io::stdin().read_to_string(&mut input).unwrap();
 
     // Part 1
-    let best_position: PositionDetected = find_asteroid_detecting_most_asteroids(build_map(input.clone()).unwrap()).unwrap();
+    let best_position: PositionDetected =
+        find_asteroid_detecting_most_asteroids(build_map(input.clone()).unwrap()).unwrap();
     writeln!(io::stdout(), "Part 1: {:?}", best_position)?;
 
     // Part 2
     let map: Map = build_map(input.clone()).unwrap();
     let vaporized_200th = vaporize(&best_position.position, &map.positions)[199];
-	writeln!(io::stdout(), "Part 2: {:?}", vaporized_200th)?;
+    writeln!(io::stdout(), "Part 2: {:?}", vaporized_200th)?;
 
     return Ok(());
 }
 
 fn vaporize(asteroid_position: &Position, asteroids_positions: &Vec<Position>) -> Vec<Position> {
-	let mut last_angle: Option<f64> = None;
-	let mut vaporized: Vec<Position> = Vec::new();
+    let mut last_angle: Option<f64> = None;
+    let mut vaporized: Vec<Position> = Vec::new();
     let mut vaporized_hs: HashSet<Position> = HashSet::new();
-	let mut detected_asteroids: Vec<ExploredAsteroid> = get_detected_asteroids(&asteroid_position, &asteroids_positions)
-		.iter()
-		.map(|(k, v)| v.clone())
-		.flatten()
-		.collect();
+    let mut detected_asteroids: Vec<ExploredAsteroid> =
+        get_detected_asteroids(&asteroid_position, &asteroids_positions)
+            .iter()
+            .map(|(_k, v)| v.clone())
+            .flatten()
+            .collect();
 
-	// Sort by angle then by distance
-	detected_asteroids.sort();
+    detected_asteroids.sort_by(|a, b| {
+        a.angle_from_source
+            .partial_cmp(&b.angle_from_source)
+            .unwrap()
+    });
 
-	while vaporized.len() < detected_asteroids.len() {
-		for asteroid in detected_asteroids.clone() {
-			if let Some(angle) = last_angle {
-					println!("{} / {}", angle, asteroid.angle_from_source);
-				if angle - asteroid.angle_from_source < 0.1 {
-					continue;
-				}
-			}
-			if vaporized_hs.contains(&asteroid.position) {
-				continue;
-			}
-			last_angle = Some(asteroid.angle_from_source);
-			vaporized_hs.insert(asteroid.position);
-			vaporized.push(asteroid.position);
-		}
-	}
-	
+    while vaporized.len() < detected_asteroids.len() - 1 {
+        for asteroid in detected_asteroids.iter() {
+            if last_angle.is_some()
+                && approx_eq!(f64, last_angle.unwrap(), asteroid.angle_from_source)
+            {
+                continue;
+            }
+            if vaporized_hs.contains(&asteroid.position) {
+                continue;
+            }
+            last_angle = Some(asteroid.angle_from_source);
+            vaporized_hs.insert(asteroid.position);
+            vaporized.push(asteroid.position);
+        }
+    }
+
     return vaporized;
 }
 
@@ -62,19 +68,34 @@ fn get_detected_asteroids(
         if other_asteroid_position.asteroid.is_some()
             && other_asteroid_position != asteroid_position
         {
-            let mut angle: f64 = (((other_asteroid_position.y as f64 - asteroid_position.y as f64)
-                as f64)
-                .atan2(other_asteroid_position.x as f64 - asteroid_position.x as f64)
-                .to_degrees())
-                .round();
-			// make sure angles start at 12 O'Clock
-			angle = (angle + 270.0) % 360.0; 
-            let other_asteroid_distance: i64 = (asteroid_position.x as i64 - other_asteroid_position.x as i64).abs() + (asteroid_position.y as i64 - other_asteroid_position.y as i64).abs();
+            let mut angle = (other_asteroid_position.y as f64 - asteroid_position.y as f64)
+                .atan2(other_asteroid_position.x as f64 - asteroid_position.x as f64);
+            angle = 180.0 * angle / PI + 90.0; // rotate by 90° (origin is up)
+            if angle < 0.0 {
+                angle += 360.0;
+            }
 
-            if let Some(detected_asteroids) = detected_asteroids.get_mut(&((angle*1000.0).round() as i64)) {
-                    detected_asteroids.push(ExploredAsteroid { position: *other_asteroid_position, angle_from_source: angle, distance_from_source: other_asteroid_distance });
+            let other_asteroid_distance: f64 =
+                (asteroid_position.x as i64 - other_asteroid_position.x as i64).abs() as f64
+                    + (asteroid_position.y as i64 - other_asteroid_position.y as i64).abs() as f64;
+
+            if let Some(detected_asteroids) =
+                detected_asteroids.get_mut(&((angle * 1000.0).round() as i64))
+            {
+                detected_asteroids.push(ExploredAsteroid {
+                    position: *other_asteroid_position,
+                    angle_from_source: angle,
+                    distance_from_source: other_asteroid_distance,
+                });
             } else {
-                detected_asteroids.insert((angle * 1000.0).round() as i64, vec![ExploredAsteroid { position: *other_asteroid_position, angle_from_source: angle, distance_from_source: other_asteroid_distance }]);
+                detected_asteroids.insert(
+                    (angle * 1000.0).round() as i64,
+                    vec![ExploredAsteroid {
+                        position: *other_asteroid_position,
+                        angle_from_source: angle,
+                        distance_from_source: other_asteroid_distance,
+                    }],
+                );
             }
         }
     }
@@ -138,28 +159,8 @@ struct Asteroid {}
 struct ExploredAsteroid {
     position: Position,
     angle_from_source: f64,
-    distance_from_source: i64,
+    distance_from_source: f64,
 }
-
-impl Ord for ExploredAsteroid {
-    fn cmp(&self, other: &Self) -> Ordering {
-		((self.angle_from_source * 1000.0).round() as i64, self.distance_from_source).cmp(&((other.angle_from_source * 1000.0).round() as i64, other.distance_from_source))
-    }
-}
-
-impl PartialOrd for ExploredAsteroid {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
-impl PartialEq for ExploredAsteroid {
-    fn eq(&self, other: &Self) -> bool {
-        (self.angle_from_source, self.distance_from_source) == (other.angle_from_source, other.distance_from_source)
-    }
-}
-
-impl Eq for ExploredAsteroid { }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 struct Position {
