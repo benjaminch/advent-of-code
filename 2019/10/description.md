@@ -57,8 +57,11 @@ Best is 5,8 with 33 other asteroids detected:
 .##.#..###
 ##...#..#.
 .#....####
+```
+
 Best is 1,2 with 35 other asteroids detected:
 
+```
 #.#...#.#.
 .###....#.
 .#....#...
