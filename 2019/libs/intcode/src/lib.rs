@@ -1,7 +1,7 @@
 use std::collections::VecDeque;
 
 #[derive(Debug)]
-struct Vm {
+pub struct Vm {
     data: Vec<i64>,
     code_pointer: usize,
     relative_base: i64,
@@ -40,6 +40,12 @@ impl Vm {
     // Allow to get outputs queue.
     pub fn outputs(self) -> Vec<i64> {
         self.outputs
+    }
+
+    // Data getter
+    // Allow to get VM data.
+    pub fn data(self) -> Vec<i64> {
+        self.data
     }
 
     // Get operation from raw input
