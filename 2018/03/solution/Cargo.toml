@@ -4,10 +4,6 @@ name = "aoc_2018_solution_3"
 version = "0.0.1"
 authors = [ "Benjamin CHastanier <benjamin.chastanier@gmail.com>"  ]
 
-[[bin]]
-name = "solution_3"
-path = "src/solution_3.rs"
-
 [dependencies]
 lazy_static = "1.4.0"
 regex = "1"

@@ -24,7 +24,7 @@ fn main() -> Result<(), Error> {
 
 fn get_direct_indirect_orbits(orbits: HashMap<&str, &str>) -> i32 {
     let mut count: i32 = 0;
-    for (orbit, ancestors) in orbits.clone().into_iter() {
+    for (orbit, _ancestors) in orbits.clone().into_iter() {
         let mut next_orbit = orbits.get(&orbit);
         while next_orbit.is_some() {
             count += 1;

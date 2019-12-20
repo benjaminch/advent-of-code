@@ -1,17 +1,19 @@
 use std::collections::HashSet;
-use std::io::{self, Read, Write};
+use std::io::{self, Error, Read, Write};
 
-fn main() {
+fn main() -> Result<(), Error> {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
 
     // Part 1
     let checksum = compute_checksum(&input);
-    writeln!(io::stdout(), "Checksum: {}", checksum);
-    
+    writeln!(io::stdout(), "Checksum: {}", checksum)?;
+
     // Part 2
     let packages = find_packages_id_having_n_diff(&input, 1);
-    writeln!(io::stdout(), "Packages: {:?}", packages);
+    writeln!(io::stdout(), "Packages: {:?}", packages)?;
+
+    Ok(())
 }
 
 fn compute_checksum(input: &str) -> i32 {
@@ -51,9 +53,10 @@ fn find_packages_id_having_n_diff(input: &str, diff_count: u32) -> Vec<MatchingP
         if seen_packages.len() > 0 {
             // compare current string with everyone already seen
             for seen in seen_packages.clone() {
-                let (diffs, common_letters) = get_letters_diff(package_id.to_string(), seen.clone());
+                let (diffs, common_letters) =
+                    get_letters_diff(package_id.to_string(), seen.clone());
                 if diffs == diff_count {
-                    result.push(MatchingPackages{
+                    result.push(MatchingPackages {
                         packages: [seen, package_id.to_string()].iter().cloned().collect(),
                         diff_count: diffs,
                         common_letters: common_letters,
@@ -64,7 +67,7 @@ fn find_packages_id_having_n_diff(input: &str, diff_count: u32) -> Vec<MatchingP
         seen_packages.insert(package_id.to_string());
     }
 
-    return result; 
+    return result;
 }
 
 fn get_letters_diff(w1: String, w2: String) -> (u32, String) {
@@ -75,8 +78,7 @@ fn get_letters_diff(w1: String, w2: String) -> (u32, String) {
     while let (Some(w1_char), Some(w2_char)) = (w1_chars.next(), w2_chars.next()) {
         if w1_char != w2_char {
             diff += 1;
-        }
-        else {
+        } else {
             common_letters.push(w1_char.to_string());
         }
     }

@@ -2,17 +2,19 @@
 extern crate lazy_static;
 extern crate regex;
 
-use std::io::{self, Read, Write};
-use std::vec::Vec;
 use regex::Regex;
+use std::io::{self, Error, Read, Write};
+use std::vec::Vec;
 
-fn main() {
+fn main() -> Result<(), Error> {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
 
     // Part 1
     let claims = get_claims(&input);
-    writeln!(io::stdout(), "{:?}", claims);
+    writeln!(io::stdout(), "{:?}", claims)?;
+
+    Ok(())
 }
 
 #[derive(Debug)]
@@ -32,7 +34,7 @@ fn get_claims(input: &str) -> Vec<Claim> {
             static ref RE: Regex = Regex::new(r"^(?P<id>[\S]+) @ (?P<position_x>[\d]+),(?P<position_y>[\d]+): (?P<width>[\d]+)x(?P<height>[\d]+)").unwrap();
         }
         if let Some(caps) = RE.captures(&line) {
-            let claim = Claim{
+            let claim = Claim {
                 id: caps["id"].parse().unwrap(),
                 position_x: caps["position_x"].parse().unwrap(),
                 position_y: caps["position_y"].parse().unwrap(),
@@ -41,6 +43,6 @@ fn get_claims(input: &str) -> Vec<Claim> {
             };
             claims.push(claim);
         }
-    } 
+    }
     return claims;
 }

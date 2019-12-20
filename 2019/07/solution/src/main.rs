@@ -73,8 +73,6 @@ fn compute_signal_v2(amplifiers_phase: Vec<i64>, code: String) -> i64 {
 
     amplifiers_inputs[0].push_back(0);
 
-    let mut loop_n: i32 = 1;
-
     while !is_last_loop {
         let mut amplifier_number: usize = 0;
         for _phase in amplifiers_phase.clone() {
@@ -105,7 +103,6 @@ fn compute_signal_v2(amplifiers_phase: Vec<i64>, code: String) -> i64 {
             }
             amplifier_number += 1;
         }
-        loop_n += 1;
     }
     return *amplifiers_outputs.last().unwrap();
 }
