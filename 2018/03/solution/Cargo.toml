@@ -1,6 +1,6 @@
 [package]
 
-name = "advent_of_code_2018_3"
+name = "aoc_2018_solution_3"
 version = "0.0.1"
 authors = [ "Benjamin CHastanier <benjamin.chastanier@gmail.com>"  ]
 
