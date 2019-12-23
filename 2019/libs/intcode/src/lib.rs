@@ -24,7 +24,7 @@ impl Vm {
             data: cloned_data,
             code_pointer: 0_usize,
             relative_base: 0,
-            inputs,
+            inputs: VecDeque::from(vec![]),
             default_input: 0,
             outputs: Vec::new(),
         }
@@ -46,6 +46,14 @@ impl Vm {
     // Allow to get VM data.
     pub fn data(self) -> Vec<i64> {
         self.data
+    }
+
+    // Reset Vm allows to reset the VM to its initial state but data memory.
+    pub fn reset(&mut self) {
+        self.code_pointer = 0_usize;
+        self.state = State::NotStarted;
+        self.inputs = VecDeque::from(vec![]);
+        self.outputs = Vec::new();
     }
 
     // Get operation from raw input
