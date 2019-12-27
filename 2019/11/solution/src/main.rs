@@ -1,9 +1,13 @@
+use intcode::Vm;
 use std::io::{self, Error, ErrorKind, Read, Write};
+use std::collections::VecDeque;
+
 
 fn main() -> Result<(), Error> {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
 
+	let instructions: Vec<i64> = get_instructions(input.clone());
     let mut map: Map = Map::new(Position { x: 2, y: 2 }, Direction::Up, 5, 5);
     println!("{}", map);
 
@@ -14,9 +18,21 @@ fn main() -> Result<(), Error> {
     return Ok(());
 }
 
-// fn paint(position: &mut Position, map: &mut Vec<Vec<u8>>) {
-//
-// }
+fn paint(instructions: Vec<i64>, map: &mut Map) {
+    let mut vm: Vm = Vm::new(instructions, VecDeque::from(vec![match map.get_current_position_color() {
+		Color::Black => 0_i64,
+		Color::White => 1_i64}]);
+	
+	// TODO: execute VM, parse outputs at the end
+}
+
+fn get_instructions(input: &mut String) -> Vec<i64> {
+    input.retain(|c| !c.is_whitespace());
+    return input
+        .split(",")
+        .flat_map(|e| e.parse::<i64>())
+        .collect::<Vec<i64>>();
+}
 
 struct Position {
     x: usize,
@@ -59,6 +75,10 @@ impl Map {
             positions: vec![Color::Black; width * height],
         };
     }
+	
+	pub fn get_current_position_color() -> Color {
+		return self.positions[self.current_position.x * self.current_position.y];
+	}
 }
 
 impl std::fmt::Display for Map {
