@@ -7,11 +7,11 @@ fn main() -> Result<(), Error> {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
 
-	let instructions: Vec<i64> = get_instructions(input.clone());
+	let instructions: Vec<i64> = get_instructions(&mut input.clone());
     let mut map: Map = Map::new(Position { x: 2, y: 2 }, Direction::Up, 5, 5);
-    println!("{}", map);
 
     // Part 1
+	paint(instructions, &mut map);
 
     // Part 2
 
@@ -19,11 +19,20 @@ fn main() -> Result<(), Error> {
 }
 
 fn paint(instructions: Vec<i64>, map: &mut Map) {
-    let mut vm: Vm = Vm::new(instructions, VecDeque::from(vec![match map.get_current_position_color() {
-		Color::Black => 0_i64,
-		Color::White => 1_i64}]);
+    let mut vm: Vm = Vm::new(instructions, VecDeque::new());
+	let mut outputs: Vec<i64> = vec![match map.get_current_position_color()];
 	
-	// TODO: execute VM, parse outputs at the end
+	for i in 0..10 {
+		vm.reset();
+		vm.add_input(match map.get_current_position_color() {
+			Color::Black => 0,
+			Color::White => 1,
+		});
+		vm.run();
+		outputs = vm.outputs();
+
+		
+	}
 }
 
 fn get_instructions(input: &mut String) -> Vec<i64> {
@@ -78,6 +87,11 @@ impl Map {
 	
 	pub fn get_current_position_color() -> Color {
 		return self.positions[self.current_position.x * self.current_position.y];
+	}
+
+	pub fn turn(direction: Direction) {
+		// TODO: convert to angle to compute new angle	
+		
 	}
 }
 
