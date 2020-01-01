@@ -153,14 +153,18 @@ impl Map {
             });
             vm.run();
 
-            if let [color_raw, direction_raw] = vm.outputs()[..].as_ref()  {
+            println!("{:?}", vm.outputs());
+
+            if let [color_raw, direction_raw] = vm.outputs()[..]  {
                 self.paint_current_position(
                     match color_raw {
                         0 => Color::Black,
                         1 => Color::White,
                         _ => Color::Unknown,
                     });
-                self.turn_and_move(get_direction(*direction_raw), 1);
+                self.turn_and_move(get_direction(direction_raw), 1);
+
+                println!("{}", self);
             }
         }
     }

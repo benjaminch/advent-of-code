@@ -38,8 +38,8 @@ impl Vm {
 
     // Outputs getter
     // Allow to get outputs queue.
-    pub fn outputs(self) -> Vec<i64> {
-        self.outputs
+    pub fn outputs(&self) -> &[i64] {
+        self.outputs.as_slice()
     }
 
     // Data getter
