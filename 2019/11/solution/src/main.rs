@@ -1,4 +1,4 @@
-use intcode::Vm;
+use intcode::{Vm, State};
 use std::collections::VecDeque;
 use std::io::{self, Error, ErrorKind, Read, Write};
 
@@ -144,28 +144,41 @@ impl Map {
 
     pub fn paint(&mut self, instructions: Vec<i64>) {
         let vm = &mut Vm::new(instructions, VecDeque::new());
-        for i in 0..10 {
+        let mut outputs: Vec<i64> = Vec::new();
+
+        println!("{}", self);
+
+        while vm.state() != &State::Stopped {
             vm.reset();
             vm.add_input(match self.get_current_position_color() {
                 Color::Black => 0,
                 Color::White => 1,
                 Color::Unknown => -1,
             });
-            vm.run();
 
-            println!("{:?}", vm.outputs());
+            // TODO: refactor
+            vm.run(true);
+            outputs.push(vm.outputs()[0]);
+            vm.run(true);
+            outputs.push(vm.outputs()[1]);
 
-            if let [color_raw, direction_raw] = vm.outputs()[..]  {
+            if let [color_raw, direction_raw] = outputs[..]  {
                 self.paint_current_position(
                     match color_raw {
                         0 => Color::Black,
                         1 => Color::White,
                         _ => Color::Unknown,
                     });
+                // TODO: there is likely an issue reading / writting data to the map
+                // coordinates, to be checked
                 self.turn_and_move(get_direction(direction_raw), 1);
 
-                println!("{}", self);
             }
+
+            println!("{:?}", outputs);
+            println!("{}", self);
+
+            outputs.clear();
         }
     }
 }

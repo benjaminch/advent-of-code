@@ -42,6 +42,10 @@ impl Vm {
         self.outputs.as_slice()
     }
 
+    pub fn state(&self) -> &State {
+        &self.state
+    }
+
     // Data getter
     // Allow to get VM data.
     pub fn data(self) -> Vec<i64> {
@@ -130,7 +134,7 @@ impl Vm {
         }
     }
 
-    pub fn run(&mut self) {
+    pub fn run(&mut self, stop_on_output: bool) {
         let instructions_len: usize = self.data.len();
 
         self.state = State::Running;
@@ -157,7 +161,13 @@ impl Vm {
                 code_pointer_increment: inputs_count,
             };
 
+            let pre_instruction_outputs_len: usize = self.outputs.len();
+
             Vm::execute_instruction(self, instruction);
+
+            if stop_on_output && self.outputs.len() > pre_instruction_outputs_len {
+                break;
+            }
 
             if self.state == State::Stopped {
                 break;
@@ -267,7 +277,7 @@ impl Vm {
 }
 
 #[derive(Debug, PartialEq)]
-enum State {
+pub enum State {
     NotStarted = 0,
     Running = 1,
     Stopped = 2,
