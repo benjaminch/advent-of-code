@@ -1,4 +1,4 @@
-use intcode::{Vm, State};
+use intcode::{State, Vm};
 use std::collections::VecDeque;
 use std::io::{self, Error, ErrorKind, Read, Write};
 
@@ -139,7 +139,8 @@ impl Map {
 
     pub fn turn_and_move(&mut self, direction: Direction, distance: u32) {
         self.current_way.turn(direction.clone());
-        self.current_position.make_move(self.current_way.direction.clone(), distance);
+        self.current_position
+            .make_move(self.current_way.direction.clone(), distance);
     }
 
     pub fn paint(&mut self, instructions: Vec<i64>) {
@@ -162,17 +163,15 @@ impl Map {
             vm.run(true);
             outputs.push(vm.outputs()[1]);
 
-            if let [color_raw, direction_raw] = outputs[..]  {
-                self.paint_current_position(
-                    match color_raw {
-                        0 => Color::Black,
-                        1 => Color::White,
-                        _ => Color::Unknown,
-                    });
+            if let [color_raw, direction_raw] = outputs[..] {
+                self.paint_current_position(match color_raw {
+                    0 => Color::Black,
+                    1 => Color::White,
+                    _ => Color::Unknown,
+                });
                 // TODO: there is likely an issue reading / writting data to the map
                 // coordinates, to be checked
                 self.turn_and_move(get_direction(direction_raw), 1);
-
             }
 
             println!("{:?}", outputs);
