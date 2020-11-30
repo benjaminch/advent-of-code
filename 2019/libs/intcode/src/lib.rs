@@ -24,7 +24,7 @@ impl Vm {
             data: cloned_data,
             code_pointer: 0_usize,
             relative_base: 0,
-            inputs: VecDeque::from(vec![]),
+            inputs,
             default_input: 0,
             outputs: Vec::new(),
         }
@@ -336,7 +336,7 @@ mod tests {
         );
 
         // Execute:
-        vm.run();
+        vm.run(true);
 
         // Verify:
         assert_eq!(vec![1], vm.outputs());
@@ -358,7 +358,7 @@ mod tests {
         );
 
         // Execute:
-        vm.run();
+        vm.run(true);
 
         // Verify:
         assert_eq!(vec![1], vm.outputs());
@@ -378,7 +378,7 @@ mod tests {
         );
 
         // Execute:
-        vm.run();
+        vm.run(false);
 
         // Verify:
         assert_eq!(
@@ -399,7 +399,7 @@ mod tests {
         );
 
         // Execute:
-        vm.run();
+        vm.run(true);
 
         // Verify:
         assert_eq!(vec![1_219_070_632_396_864], vm.outputs());
@@ -414,7 +414,7 @@ mod tests {
         let mut vm: Vm = Vm::new(vec![104, 1_125_899_906_842_624, 99], VecDeque::new());
 
         // Execute:
-        vm.run();
+        vm.run(true);
 
         // Verify:
         assert_eq!(vec![1_125_899_906_842_624], vm.outputs());
@@ -492,7 +492,7 @@ mod tests {
         );
 
         // Execute:
-        vm.run();
+        vm.run(false);
 
         // Verify:
         assert_eq!(vec![4_080_871_669], vm.outputs());

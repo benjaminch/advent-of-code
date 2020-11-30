@@ -9,7 +9,7 @@ fn main() -> Result<(), Error> {
 
     // Part 1
     let mut vm_part_1 = Vm::new(get_instructions(&mut input.clone(), 12, 2), VecDeque::new());
-    vm_part_1.run();
+    vm_part_1.run(true);
     writeln!(
         io::stdout(),
         "Part 1, index 0 value: {:?}",
@@ -23,7 +23,7 @@ fn main() -> Result<(), Error> {
                 get_instructions(&mut input.clone(), noun, verb),
                 VecDeque::new(),
             );
-            vm_part_2.run();
+            vm_part_2.run(true);
             if vm_part_2.data()[0] == 19_690_720 {
                 writeln!(
                     io::stdout(),

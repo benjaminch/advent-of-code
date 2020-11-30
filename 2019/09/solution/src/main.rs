@@ -12,7 +12,7 @@ fn main() -> Result<(), Error> {
         get_instructions(&mut input.clone()),
         VecDeque::from(vec![1]),
     );
-    vm_part_1.run();
+    vm_part_1.run(false);
     writeln!(io::stdout(), "Part 1: output {:?}", vm_part_1.outputs())?;
 
     // Part 2
@@ -20,7 +20,7 @@ fn main() -> Result<(), Error> {
         get_instructions(&mut input.clone()),
         VecDeque::from(vec![2]),
     );
-    vm_part_2.run();
+    vm_part_2.run(false);
     writeln!(io::stdout(), "Part 2: output {:?}", vm_part_2.outputs())?;
 
     return Ok(());
