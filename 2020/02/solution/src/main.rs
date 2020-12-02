@@ -170,6 +170,7 @@ mod tests {
 
         // Execute & Verify:
         for entry in entries {
+            "2-9 c: ccccccccc".parse().unwrap();
             assert_eq!(false, entry.is_valid_policy_2());
         }
     }
