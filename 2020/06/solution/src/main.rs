@@ -11,7 +11,7 @@ fn get_groups_anyone_yes_answers(input: &str) -> Vec<u32> {
         for c in line.chars() {
             let c_index: u32 = c as u32;
             if c_index >= a_index && c_index <= z_index {
-                group_answers |= 1 << c_index % (z_index - a_index + 1);
+                group_answers |= 1 << (c_index % (z_index - a_index + 1));
             }
         }
 
@@ -39,7 +39,7 @@ fn get_groups_everyone_yes_answers(input: &str) -> Vec<u32> {
             for c in line.chars() {
                 let c_index: u32 = c as u32;
                 if c_index >= a_index && c_index <= z_index {
-                    individual_answer |= 1 << c_index % (z_index - a_index + 1);
+                    individual_answer |= 1 << (c_index % (z_index - a_index + 1));
                 }
             }
 
@@ -79,5 +79,5 @@ fn main() -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 }

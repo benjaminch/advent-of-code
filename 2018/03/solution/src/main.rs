@@ -44,5 +44,5 @@ fn get_claims(input: &str) -> Vec<Claim> {
             claims.push(claim);
         }
     }
-    return claims;
+    claims
 }

@@ -24,7 +24,7 @@ fn main() -> Result<(), Error> {
         find_min_steps_intersection(&wire_1, &wire_2).unwrap()
     )?;
 
-    return Ok(());
+    Ok(())
 }
 
 fn find_min_intersection_distance(wire_1: &Vec<Position>, wire_2: &Vec<Position>) -> Option<i32> {
@@ -35,7 +35,7 @@ fn find_min_intersection_distance(wire_1: &Vec<Position>, wire_2: &Vec<Position>
             min_distance = Some(distance);
         }
     }
-    return min_distance;
+    min_distance
 }
 
 fn find_min_steps_intersection(wire_1: &Vec<Position>, wire_2: &Vec<Position>) -> Option<u32> {
@@ -51,7 +51,7 @@ fn find_min_steps_intersection(wire_1: &Vec<Position>, wire_2: &Vec<Position>) -
             }
         }
     }
-    return min_steps;
+    min_steps
 }
 
 fn steps_to_position(position: Position, wire: &Vec<Position>) -> Option<u32> {
@@ -62,7 +62,7 @@ fn steps_to_position(position: Position, wire: &Vec<Position>) -> Option<u32> {
         }
         steps += 1;
     }
-    return None;
+    None
 }
 
 fn get_intersections(wire_1: &Vec<Position>, wire_2: &Vec<Position>) -> Vec<Position> {
@@ -76,20 +76,20 @@ fn get_intersections(wire_1: &Vec<Position>, wire_2: &Vec<Position>) -> Vec<Posi
 
 fn compute_path(input: String) -> Vec<Position> {
     let moves: Vec<Move> = input
-        .split(",")
+        .split(',')
         .map(|e| get_move(e.to_string()))
         .collect::<Vec<Move>>();
 
     let mut positions: Vec<Position> = Vec::new();
     positions.push(Position { x: 0, y: 0 });
     for m in moves {
-        let last_position: Position = positions.last().unwrap().clone();
+        let last_position: Position = *positions.last().unwrap();
         for p in get_positions(m, last_position) {
             positions.push(p);
         }
     }
 
-    return positions;
+    positions
 }
 
 fn get_positions(m: Move, p: Position) -> Vec<Position> {
@@ -115,10 +115,10 @@ fn get_positions(m: Move, p: Position) -> Vec<Position> {
                 y: position.y,
             },
         };
-        positions.push(position.clone());
+        positions.push(position);
         moves += 1;
     }
-    return positions;
+    positions
 }
 
 fn get_direction(symbol: char) -> Option<Direction> {

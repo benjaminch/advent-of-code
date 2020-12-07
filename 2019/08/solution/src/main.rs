@@ -9,7 +9,7 @@ fn main() -> Result<(), Error> {
         .chars()
         .map(|c| c.to_string().parse::<i32>().unwrap())
         .collect::<Vec<i32>>();
-    let image: Image = build_image(&input_pixels.clone(), 25, 6);
+    let image: Image = build_image(&input_pixels, 25, 6);
 
     // Part 1
     let (layer_having_fewest_0, _count_0): (usize, i32) =
@@ -26,7 +26,7 @@ fn main() -> Result<(), Error> {
     // Part 2
     write!(io::stdout(), "Message:\n{}", merge_layers(&image),)?;
 
-    return Ok(());
+    Ok(())
 }
 
 fn count_in_layer(input: i32, layer: usize, image: &Image) -> i32 {
@@ -41,7 +41,7 @@ fn count_in_layer(input: i32, layer: usize, image: &Image) -> i32 {
         }
     }
 
-    return input_count;
+    input_count
 }
 
 fn find_layer_having_fewest(input: i32, image: &Image) -> Option<(usize, i32)> {
@@ -55,7 +55,7 @@ fn find_layer_having_fewest(input: i32, image: &Image) -> Option<(usize, i32)> {
         }
     }
 
-    return min_layer;
+    min_layer
 }
 
 fn merge_layers(image: &Image) -> Image {
@@ -65,7 +65,7 @@ fn merge_layers(image: &Image) -> Image {
         result_pixels[i] = get_pixel_value(i, image).unwrap();
     }
 
-    return build_image(&result_pixels, image.width, image.height);
+    build_image(&result_pixels, image.width, image.height)
 }
 
 fn get_pixel_value(position: usize, image: &Image) -> Option<i32> {
@@ -83,16 +83,16 @@ fn get_pixel_value(position: usize, image: &Image) -> Option<i32> {
         pixel_index += image.width * image.height;
     }
 
-    return None;
+    None
 }
 
 fn build_image(input_pixels: &Vec<i32>, width: usize, height: usize) -> Image {
-    return Image {
+    Image {
         pixels: input_pixels.clone(),
-        width: width,
-        height: height,
+        width,
+        height,
         layers_count: input_pixels.len() / (width * height),
-    };
+    }
 }
 
 #[derive(Debug)]
@@ -109,7 +109,7 @@ impl std::fmt::Display for Image {
         // prints only first layer
         for i in 0..(self.width * self.height) {
             if i % (self.width) == 0 {
-                output.push_str("\n");
+                output.push('\n');
             }
             output.push_str(match self.pixels[i] {
                 0 => " ",

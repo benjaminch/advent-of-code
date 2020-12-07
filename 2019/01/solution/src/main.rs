@@ -18,7 +18,7 @@ fn main() -> Result<(), Error> {
         compute_fuel_requirement(&input, true)
     )?;
 
-    return Ok(());
+    Ok(())
 }
 
 fn compute_fuel_requirement(input_modules: &str, compute_fuel_for_fuel: bool) -> u32 {
@@ -36,7 +36,7 @@ fn compute_fuel_for_mass(module: u32, compute_fuel_for_fuel: bool) -> u32 {
         if fuel <= 0 {
             return 0;
         }
-        return fuel as u32;
+        fuel as u32
     };
 
     loop {
@@ -48,5 +48,5 @@ fn compute_fuel_for_mass(module: u32, compute_fuel_for_fuel: bool) -> u32 {
         }
     }
 
-    return fuel;
+    fuel
 }

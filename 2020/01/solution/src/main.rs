@@ -41,7 +41,7 @@ fn get_numbers_list_from_str(input: &str) -> Vec<i32> {
 }
 
 fn find_two_numbers_summing_to(numbers: &Vec<i32>, target_sum: i32) -> Option<(i32, i32)> {
-    if numbers.len() > 0 {
+    if !numbers.is_empty() {
         // Sort vec
         let mut sorted_numbers = numbers.clone();
         sorted_numbers.sort_unstable();

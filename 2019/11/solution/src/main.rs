@@ -1,12 +1,12 @@
 use intcode::{State, Vm};
 use std::collections::VecDeque;
-use std::io::{self, Error, ErrorKind, Read, Write};
+use std::io::{self, Error, Read, Write};
 
 fn main() -> Result<(), Error> {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
 
-    let instructions: Vec<i64> = get_instructions(&mut input.clone());
+    let instructions: Vec<i64> = get_instructions(&mut input);
     let mut map: Map = Map::new(Position { x: 2, y: 2 }, Way::new(Direction::Up), 5, 5);
 
     // Part 1
@@ -14,13 +14,13 @@ fn main() -> Result<(), Error> {
 
     // Part 2
 
-    return Ok(());
+    Ok(())
 }
 
 fn get_instructions(input: &mut String) -> Vec<i64> {
     input.retain(|c| !c.is_whitespace());
     return input
-        .split(",")
+        .split(',')
         .flat_map(|e| e.parse::<i64>())
         .collect::<Vec<i64>>();
 }
@@ -53,35 +53,35 @@ enum Direction {
 }
 
 fn get_direction(direction_raw: i64) -> Direction {
-    return match direction_raw {
+    match direction_raw {
         0 => Direction::Left,
         1 => Direction::Right,
         2 => Direction::Up,
         3 => Direction::Down,
         _ => Direction::Unknown,
-    };
+    }
 }
 
 fn direction_to_degrees(direction: Direction) -> i32 {
-    return match direction {
+    match direction {
         Direction::Right => 0,
         Direction::Down => 270,
         Direction::Left => 180,
         Direction::Up => 90,
         _ => -1,
-    };
+    }
 }
 
 fn degrees_to_direction(angle: i32) -> Direction {
-    let normalized_angle: i32 = angle % 360;
-    if angle >= 0 && angle < 90 {
-        return Direction::Right;
-    } else if angle >= 90 && angle < 180 {
-        return Direction::Up;
-    } else if angle >= 180 && angle < 270 {
-        return Direction::Left;
+    let _normalized_angle: i32 = angle % 360;
+    if (0..90).contains(&angle) {
+        Direction::Right
+    } else if (90..180).contains(&angle) {
+        Direction::Up
+    } else if (180..270).contains(&angle) {
+        Direction::Left
     } else {
-        return Direction::Down;
+        Direction::Down
     }
 }
 
@@ -91,9 +91,9 @@ struct Way {
 
 impl Way {
     pub fn new(direction: Direction) -> Way {
-        return Way {
-            direction: direction,
-        };
+        Way {
+            direction,
+        }
     }
 
     pub fn turn(&mut self, direction: Direction) {
@@ -120,17 +120,17 @@ struct Map {
 
 impl Map {
     pub fn new(current_position: Position, current_way: Way, width: usize, height: usize) -> Map {
-        return Map {
-            current_position: current_position,
-            current_way: current_way,
-            width: width,
-            height: height,
+        Map {
+            current_position,
+            current_way,
+            width,
+            height,
             positions: vec![Color::Black; width * height],
-        };
+        }
     }
 
     fn get_current_position_color(&self) -> Color {
-        return self.positions[self.current_position.x * self.current_position.y].clone();
+        self.positions[self.current_position.x * self.current_position.y].clone()
     }
 
     fn paint_current_position(&mut self, color: Color) {
@@ -138,7 +138,7 @@ impl Map {
     }
 
     pub fn turn_and_move(&mut self, direction: Direction, distance: u32) {
-        self.current_way.turn(direction.clone());
+        self.current_way.turn(direction);
         self.current_position
             .make_move(self.current_way.direction.clone(), distance);
     }
@@ -187,23 +187,23 @@ impl std::fmt::Display for Map {
         let mut output = String::with_capacity(self.width * self.height + self.height);
         for i in 0..self.positions.len() {
             if i % (self.width) == 0 {
-                output.push_str("\n");
+                output.push('\n');
             }
             if i % self.width == self.current_position.x
                 && (i / self.width) % self.height == self.current_position.y
             {
                 match self.current_way.direction {
-                    Direction::Left => output.push_str("<"),
-                    Direction::Right => output.push_str(">"),
-                    Direction::Up => output.push_str("^"),
-                    Direction::Down => output.push_str("v"),
-                    Direction::Unknown => output.push_str("x"),
+                    Direction::Left => output.push('<'),
+                    Direction::Right => output.push('>'),
+                    Direction::Up => output.push('^'),
+                    Direction::Down => output.push('v'),
+                    Direction::Unknown => output.push('x'),
                 };
             } else {
                 match self.positions[i] {
-                    Color::Black => output.push_str("."),
-                    Color::White => output.push_str("#"),
-                    Color::Unknown => output.push_str(" "),
+                    Color::Black => output.push('.'),
+                    Color::White => output.push('#'),
+                    Color::Unknown => output.push(' '),
                 };
             }
         }

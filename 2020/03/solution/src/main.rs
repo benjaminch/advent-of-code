@@ -34,7 +34,7 @@ impl FromStr for Cell {
 
 impl Cell {
     fn new(geology: Geology) -> Cell {
-        Cell { geology: geology }
+        Cell { geology }
     }
 }
 
@@ -73,11 +73,11 @@ impl FromStr for Map {
 impl Map {
     fn new(map_width: usize, map_height: usize, cells: Vec<Cell>) -> Map {
         Map {
-            cells: cells,
+            cells,
             current_cell_x: 0,
             current_cell_y: 0,
-            map_width: map_width,
-            map_height: map_height,
+            map_width,
+            map_height,
         }
     }
 
@@ -118,8 +118,8 @@ struct Move {
 impl Move {
     fn new(right: usize, bottom: usize) -> Move {
         Move {
-            right: right,
-            bottom: bottom,
+            right,
+            bottom,
         }
     }
 }
@@ -179,5 +179,5 @@ fn main() -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 }

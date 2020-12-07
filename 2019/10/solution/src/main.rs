@@ -15,11 +15,11 @@ fn main() -> Result<(), Error> {
     writeln!(io::stdout(), "Part 1: {:?}", best_position)?;
 
     // Part 2
-    let map: Map = build_map(input.clone()).unwrap();
+    let map: Map = build_map(input).unwrap();
     let vaporized_200th = vaporize(&best_position.position, &map.positions)[199];
     writeln!(io::stdout(), "Part 2: {:?}", vaporized_200th)?;
 
-    return Ok(());
+    Ok(())
 }
 
 fn vaporize(asteroid_position: &Position, asteroids_positions: &Vec<Position>) -> Vec<Position> {
@@ -55,7 +55,7 @@ fn vaporize(asteroid_position: &Position, asteroids_positions: &Vec<Position>) -
         }
     }
 
-    return vaporized;
+    vaporized
 }
 
 fn get_detected_asteroids(
@@ -100,7 +100,7 @@ fn get_detected_asteroids(
         }
     }
 
-    return detected_asteroids;
+    detected_asteroids
 }
 
 fn find_asteroid_detecting_most_asteroids(map: Map) -> Option<PositionDetected> {
@@ -120,7 +120,7 @@ fn find_asteroid_detecting_most_asteroids(map: Map) -> Option<PositionDetected> 
         }
     }
 
-    return result;
+    result
 }
 
 fn build_map(input: String) -> Result<Map, Error> {
@@ -145,11 +145,11 @@ fn build_map(input: String) -> Result<Map, Error> {
         width += 1;
     }
 
-    return Ok(Map {
-        width: width,
-        height: height,
-        positions: positions,
-    });
+    Ok(Map {
+        width,
+        height,
+        positions,
+    })
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -187,7 +187,7 @@ impl std::fmt::Display for Map {
         let mut output = String::with_capacity(self.width * self.height + self.height);
         for i in 0..self.positions.len() {
             if i % (self.width) == 0 {
-                output.push_str("\n");
+                output.push('\n');
             }
             output.push_str(match &self.positions[i].asteroid {
                 Some(_) => "#",

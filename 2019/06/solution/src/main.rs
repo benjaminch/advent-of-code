@@ -19,7 +19,7 @@ fn main() -> Result<(), Error> {
     let min_transferts = get_min_transferts(orbits.clone(), "YOU", "SAN");
     writeln!(io::stdout(), "Min transferts: {}", min_transferts)?;
 
-    return Ok(());
+    Ok(())
 }
 
 fn get_direct_indirect_orbits(orbits: HashMap<&str, &str>) -> i32 {
@@ -31,7 +31,7 @@ fn get_direct_indirect_orbits(orbits: HashMap<&str, &str>) -> i32 {
             next_orbit = orbits.get(next_orbit.unwrap());
         }
     }
-    return count;
+    count
 }
 
 fn get_min_transferts(orbits: HashMap<&str, &str>, point_1: &str, point_2: &str) -> i32 {
@@ -55,11 +55,9 @@ fn get_min_transferts(orbits: HashMap<&str, &str>, point_1: &str, point_2: &str)
 fn build_orbits(input: &str) -> HashMap<&str, &str> {
     let mut orbits: HashMap<&str, &str> = HashMap::new();
     for l in input.lines() {
-        let s = l.split(")").collect::<Vec<&str>>();
+        let s = l.split(')').collect::<Vec<&str>>();
         let (ancestor, orbit) = (s[0], s[1]);
-        if !orbits.contains_key(&orbit) {
-            orbits.insert(orbit, ancestor);
-        }
+        orbits.entry(orbit).or_insert(ancestor);
     }
-    return orbits;
+    orbits
 }

@@ -11,7 +11,7 @@ struct Color {
 
 impl Color {
     fn new(v: String) -> Color {
-        Color { v: v }
+        Color { v }
     }
 }
 
@@ -22,7 +22,7 @@ struct FinishType {
 
 impl FinishType {
     fn new(v: String) -> FinishType {
-        FinishType { v: v }
+        FinishType { v }
     }
 }
 
@@ -34,7 +34,7 @@ struct BagSlot {
 
 impl BagSlot {
     fn new(b: Bag, count: u32) -> BagSlot {
-        BagSlot { b: b, count: count }
+        BagSlot { b, count }
     }
 }
 
@@ -46,7 +46,7 @@ struct Bag {
 
 impl Bag {
     fn new(c: Color, t: FinishType) -> Bag {
-        Bag { c: c, t: t }
+        Bag { c, t }
     }
 
     fn name(&self) -> String {
@@ -119,7 +119,7 @@ impl Rules {
 
     fn bag_count(&self, b: &Bag) -> usize {
         if let Some(subs) = self.r.get(&b.name()) {
-            if subs.len() == 0 {
+            if subs.is_empty() {
                 return 1;
             }
             return 1 + subs
@@ -150,7 +150,7 @@ impl FromStr for Rules {
                 )?;
                 rules.add(&bag, None);
 
-                for contained_bag_raw_str in contained_bags_raw_str.split(",") {
+                for contained_bag_raw_str in contained_bags_raw_str.split(',') {
                     if contained_bag_raw_str.trim() == "no other bags" {
                         break;
                     }
@@ -185,7 +185,7 @@ fn main() -> Result<(), Error> {
     let mut input = String::new();
     io::stdin().read_to_string(&mut input).unwrap();
 
-    // TODO: Refactor from the ground up this day, everything is ugly and needs to be 
+    // TODO: Refactor from the ground up this day, everything is ugly and needs to be
     // done properly
 
     // Part 1
@@ -217,5 +217,5 @@ fn main() -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 }

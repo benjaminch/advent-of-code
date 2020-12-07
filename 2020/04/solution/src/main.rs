@@ -45,28 +45,28 @@ impl Passport {
         }
 
         // byr (Birth Year) - four digits; at least 1920 and at most 2002.
-        if (match self.byr.clone().unwrap().parse::<u32>() {
-            Ok(v) => v >= 1920 && v <= 2002,
+        if !(match self.byr.clone().unwrap().parse::<u32>() {
+            Ok(v) => (1920..=2002).contains(&v),
             _ => false,
-        }) == false
+        })
         {
             return false;
         }
 
         // iyr (Issue Year) - four digits; at least 2010 and at most 2020.
-        if (match self.iyr.clone().unwrap().parse::<u32>() {
-            Ok(v) => v >= 2010 && v <= 2020,
+        if !(match self.iyr.clone().unwrap().parse::<u32>() {
+            Ok(v) => (2010..=2020).contains(&v),
             _ => false,
-        }) == false
+        })
         {
             return false;
         }
 
         // eyr (Expiration Year) - four digits; at least 2020 and at most 2030.
-        if (match self.eyr.clone().unwrap().parse::<u32>() {
-            Ok(v) => v >= 2020 && v <= 2030,
+        if !(match self.eyr.clone().unwrap().parse::<u32>() {
+            Ok(v) => (2020..=2030).contains(&v),
             _ => false,
-        }) == false
+        })
         {
             return false;
         }
@@ -77,14 +77,14 @@ impl Passport {
         let hgt = self.hgt.as_ref().unwrap().clone();
         if hgt.contains("cm") {
             if !match hgt.replace("cm", "").parse::<u32>() {
-                Ok(v) => v >= 150 && v <= 193,
+                Ok(v) => (150..=193).contains(&v),
                 _ => false,
             } {
                 return false;
             }
         } else if hgt.contains("in") {
             if !match hgt.replace("in", "").parse::<u32>() {
-                Ok(v) => v >= 59 && v <= 76,
+                Ok(v) => (59..=76).contains(&v),
                 _ => false,
             } {
                 return false;
@@ -95,7 +95,7 @@ impl Passport {
 
         // hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
         let hcl = self.hcl.as_ref().unwrap().clone();
-        if !hcl.starts_with("#") {
+        if !hcl.starts_with('#') {
             return false;
         }
         for c in hcl.chars().skip(1) {
@@ -234,5 +234,5 @@ fn main() -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 }

@@ -50,7 +50,7 @@ fn find_packages_id_having_n_diff(input: &str, diff_count: u32) -> Vec<MatchingP
 
     for line in input.lines() {
         let package_id = line.clone();
-        if seen_packages.len() > 0 {
+        if !seen_packages.is_empty() {
             // compare current string with everyone already seen
             for seen in seen_packages.clone() {
                 let (diffs, common_letters) =
@@ -59,7 +59,7 @@ fn find_packages_id_having_n_diff(input: &str, diff_count: u32) -> Vec<MatchingP
                     result.push(MatchingPackages {
                         packages: [seen, package_id.to_string()].iter().cloned().collect(),
                         diff_count: diffs,
-                        common_letters: common_letters,
+                        common_letters,
                     });
                 }
             }
@@ -67,7 +67,7 @@ fn find_packages_id_having_n_diff(input: &str, diff_count: u32) -> Vec<MatchingP
         seen_packages.insert(package_id.to_string());
     }
 
-    return result;
+    result
 }
 
 fn get_letters_diff(w1: String, w2: String) -> (u32, String) {
@@ -82,5 +82,5 @@ fn get_letters_diff(w1: String, w2: String) -> (u32, String) {
             common_letters.push(w1_char.to_string());
         }
     }
-    return (diff, common_letters.join(""));
+    (diff, common_letters.join(""))
 }

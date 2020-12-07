@@ -16,19 +16,19 @@ fn main() -> Result<(), Error> {
 
     // Part 2
     let mut vm_part_2 = Vm::new(
-        get_instructions(&mut input.clone()),
+        get_instructions(&mut input),
         VecDeque::from(vec![5]),
     );
     vm_part_2.run(true);
     writeln!(io::stdout(), "Part 2: output {:?}", vm_part_2.outputs())?;
 
-    return Ok(());
+    Ok(())
 }
 
 fn get_instructions(input: &mut String) -> Vec<i64> {
     input.retain(|c| !c.is_whitespace());
     return input
-        .split(",")
+        .split(',')
         .flat_map(|e| e.parse::<i64>())
         .collect::<Vec<i64>>();
 }

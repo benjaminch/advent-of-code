@@ -10,8 +10,8 @@ struct Seat {
 impl Seat {
     fn new(row: u32, column: u32) -> Seat {
         Seat {
-            row: row,
-            column: column,
+            row,
+            column,
         }
     }
 
@@ -79,8 +79,8 @@ impl FromStr for Seat {
 }
 
 fn get_missing_seat_id(seat_ids: Vec<u32>) -> Option<u32> {
-    let mut ids = seat_ids.clone();
-    ids.sort();
+    let mut ids = seat_ids;
+    ids.sort_unstable();
 
     let mut min_seat_id: u32 = 0;
 
@@ -104,8 +104,7 @@ fn main() -> Result<(), Error> {
     let part_1_max_seat_id: u32 = input
         .lines()
         .map(|x| Seat::from_str(x).unwrap().id())
-        .max()
-        .unwrap_or_else(|| 0u32);
+        .max().unwrap_or(0u32);
 
     writeln!(
         io::stdout(),
@@ -119,8 +118,7 @@ fn main() -> Result<(), Error> {
             .lines()
             .map(|x| Seat::from_str(x).unwrap().id())
             .collect(),
-    )
-    .unwrap_or_else(|| 0u32);
+    ).unwrap_or(0u32);
 
     writeln!(
         io::stdout(),
@@ -133,5 +131,5 @@ fn main() -> Result<(), Error> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    
 }

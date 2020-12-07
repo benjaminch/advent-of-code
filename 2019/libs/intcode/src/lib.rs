@@ -146,18 +146,15 @@ impl Vm {
                 self.data[self.code_pointer..(self.code_pointer + inputs_count)].to_vec();
             let instruction: Instruction = Instruction {
                 operator,
-                input_1_index: *raw_instruction.get(1).unwrap_or_else(|| &0),
+                input_1_index: *raw_instruction.get(1).unwrap_or(&0),
                 input_1_parameter_mode: inputs_modes
-                    .pop()
-                    .unwrap_or_else(|| ParameterMode::Position),
-                input_2_index: *raw_instruction.get(2).unwrap_or_else(|| &0),
+                    .pop().unwrap_or(ParameterMode::Position),
+                input_2_index: *raw_instruction.get(2).unwrap_or(&0),
                 input_2_parameter_mode: inputs_modes
-                    .pop()
-                    .unwrap_or_else(|| ParameterMode::Position),
-                input_3_index: *raw_instruction.get(3).unwrap_or_else(|| &0),
+                    .pop().unwrap_or(ParameterMode::Position),
+                input_3_index: *raw_instruction.get(3).unwrap_or(&0),
                 input_3_parameter_mode: inputs_modes
-                    .pop()
-                    .unwrap_or_else(|| ParameterMode::Position),
+                    .pop().unwrap_or(ParameterMode::Position),
                 code_pointer_increment: inputs_count,
             };
 
@@ -234,7 +231,7 @@ impl Vm {
                 self.code_pointer += instruction.code_pointer_increment;
             }
             Operation::Input => {
-                self.data[input_1_write as usize] = self.inputs.pop_back().unwrap_or_else(|| 0);
+                self.data[input_1_write as usize] = self.inputs.pop_back().unwrap_or(0);
                 self.code_pointer += instruction.code_pointer_increment;
             }
             Operation::Output => {
