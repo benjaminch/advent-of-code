@@ -16,10 +16,7 @@ fn main() -> Result<(), Error> {
     writeln!(io::stdout(), "Part 1: output {:?}", vm_part_1.outputs())?;
 
     // Part 2
-    let mut vm_part_2 = Vm::new(
-        get_instructions(&mut input),
-        VecDeque::from(vec![2]),
-    );
+    let mut vm_part_2 = Vm::new(get_instructions(&mut input), VecDeque::from(vec![2]));
     vm_part_2.run(false);
     writeln!(io::stdout(), "Part 2: output {:?}", vm_part_2.outputs())?;
 

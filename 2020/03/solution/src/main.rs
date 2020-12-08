@@ -117,10 +117,7 @@ struct Move {
 
 impl Move {
     fn new(right: usize, bottom: usize) -> Move {
-        Move {
-            right,
-            bottom,
-        }
+        Move { right, bottom }
     }
 }
 
@@ -178,6 +175,4 @@ fn main() -> Result<(), Error> {
 }
 
 #[cfg(test)]
-mod tests {
-    
-}
+mod tests {}

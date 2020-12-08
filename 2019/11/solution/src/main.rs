@@ -91,9 +91,7 @@ struct Way {
 
 impl Way {
     pub fn new(direction: Direction) -> Way {
-        Way {
-            direction,
-        }
+        Way { direction }
     }
 
     pub fn turn(&mut self, direction: Direction) {

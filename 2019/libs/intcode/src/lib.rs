@@ -147,14 +147,11 @@ impl Vm {
             let instruction: Instruction = Instruction {
                 operator,
                 input_1_index: *raw_instruction.get(1).unwrap_or(&0),
-                input_1_parameter_mode: inputs_modes
-                    .pop().unwrap_or(ParameterMode::Position),
+                input_1_parameter_mode: inputs_modes.pop().unwrap_or(ParameterMode::Position),
                 input_2_index: *raw_instruction.get(2).unwrap_or(&0),
-                input_2_parameter_mode: inputs_modes
-                    .pop().unwrap_or(ParameterMode::Position),
+                input_2_parameter_mode: inputs_modes.pop().unwrap_or(ParameterMode::Position),
                 input_3_index: *raw_instruction.get(3).unwrap_or(&0),
-                input_3_parameter_mode: inputs_modes
-                    .pop().unwrap_or(ParameterMode::Position),
+                input_3_parameter_mode: inputs_modes.pop().unwrap_or(ParameterMode::Position),
                 code_pointer_increment: inputs_count,
             };
 

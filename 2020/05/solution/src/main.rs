@@ -9,10 +9,7 @@ struct Seat {
 
 impl Seat {
     fn new(row: u32, column: u32) -> Seat {
-        Seat {
-            row,
-            column,
-        }
+        Seat { row, column }
     }
 
     fn id(&self) -> u32 {
@@ -104,7 +101,8 @@ fn main() -> Result<(), Error> {
     let part_1_max_seat_id: u32 = input
         .lines()
         .map(|x| Seat::from_str(x).unwrap().id())
-        .max().unwrap_or(0u32);
+        .max()
+        .unwrap_or(0u32);
 
     writeln!(
         io::stdout(),
@@ -118,7 +116,8 @@ fn main() -> Result<(), Error> {
             .lines()
             .map(|x| Seat::from_str(x).unwrap().id())
             .collect(),
-    ).unwrap_or(0u32);
+    )
+    .unwrap_or(0u32);
 
     writeln!(
         io::stdout(),
@@ -130,6 +129,4 @@ fn main() -> Result<(), Error> {
 }
 
 #[cfg(test)]
-mod tests {
-    
-}
+mod tests {}

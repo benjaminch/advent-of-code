@@ -48,8 +48,7 @@ impl Passport {
         if !(match self.byr.clone().unwrap().parse::<u32>() {
             Ok(v) => (1920..=2002).contains(&v),
             _ => false,
-        })
-        {
+        }) {
             return false;
         }
 
@@ -57,8 +56,7 @@ impl Passport {
         if !(match self.iyr.clone().unwrap().parse::<u32>() {
             Ok(v) => (2010..=2020).contains(&v),
             _ => false,
-        })
-        {
+        }) {
             return false;
         }
 
@@ -66,8 +64,7 @@ impl Passport {
         if !(match self.eyr.clone().unwrap().parse::<u32>() {
             Ok(v) => (2020..=2030).contains(&v),
             _ => false,
-        })
-        {
+        }) {
             return false;
         }
 
@@ -233,6 +230,4 @@ fn main() -> Result<(), Error> {
 }
 
 #[cfg(test)]
-mod tests {
-    
-}
+mod tests {}
