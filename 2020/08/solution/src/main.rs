@@ -58,9 +58,9 @@ impl<'a> Executor<'a> {
         let mut operation_changed = false;
 
         while self.code_pointer < self.operations.len() {
-            let mut operation: Operation = self.operations[self.code_pointer].clone();
+            let mut operation: Operation = self.operations[self.code_pointer];
 
-            if operation_changed == false
+            if !operation_changed
                 && self.instruction_to_be_changed_pointer.is_some()
                 && self.instruction_to_be_changed_pointer.unwrap() == self.code_pointer
             {
@@ -121,7 +121,7 @@ fn main() -> Result<(), Error> {
     // Part 2
     loop {
         executor.reset();
-        if let Ok(_) = executor.execute() {
+        if executor.execute().is_ok() {
             writeln!(io::stdout(), "Part - 2 / ACC: {}", executor.accumulator,)?;
             break;
         }
