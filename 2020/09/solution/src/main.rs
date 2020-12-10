@@ -116,6 +116,7 @@ fn main() -> Result<(), Error> {
 mod tests {
     use super::*;
 
+    #[test]
     fn test_get_first_invalid_entry() {
         // Setup:
         const PREAMBULE_LENGTH: usize = 5;
@@ -131,6 +132,7 @@ mod tests {
         assert_eq!(Some(127), result);
     }
 
+    #[test]
     fn test_get_subset_summing_to() {
         // Setup:
         const number_target: i64 = 127;
