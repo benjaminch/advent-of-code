@@ -1,0 +1,48 @@
+[package]
+name = "aoc_2020"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc_utils = { path = "../../utils" }
+parse-display = "0.4"
+
+[[bin]]
+name = "2020_day01"
+path = "src/bin/day01.rs"
+
+[[bin]]
+name = "2020_day02"
+path = "src/bin/day02.rs"
+
+[[bin]]
+name = "2020_day03"
+path = "src/bin/day03.rs"
+
+[[bin]]
+name = "2020_day04"
+path = "src/bin/day04.rs"
+
+[[bin]]
+name = "2020_day05"
+path = "src/bin/day05.rs"
+
+[[bin]]
+name = "2020_day06"
+path = "src/bin/day06.rs"
+
+[[bin]]
+name = "2020_day07"
+path = "src/bin/day07.rs"
+
+[[bin]]
+name = "2020_day08"
+path = "src/bin/day08.rs"
+
+[[bin]]
+name = "2020_day09"
+path = "src/bin/day09.rs"
+
+[[bin]]
+name = "2020_day10"
+path = "src/bin/day10.rs"

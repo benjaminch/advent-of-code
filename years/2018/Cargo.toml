@@ -1,0 +1,21 @@
+[package]
+name = "aoc_2018"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc_utils = { path = "../../utils" }
+lazy_static = "1.4.0"
+regex = "1"
+
+[[bin]]
+name = "2018_day01"
+path = "src/bin/day01.rs"
+
+[[bin]]
+name = "2018_day02"
+path = "src/bin/day02.rs"
+
+[[bin]]
+name = "2018_day03"
+path = "src/bin/day03.rs"

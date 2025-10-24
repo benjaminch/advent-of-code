@@ -1,0 +1,9 @@
+[package]
+name = "aoc_utils"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# Add common dependencies that all years might need
+# thiserror = "2.0"
+# itertools = "0.12"

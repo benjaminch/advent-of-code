@@ -1,0 +1,54 @@
+[package]
+name = "aoc_2019"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+aoc_utils = { path = "../../utils" }
+intcode = { path = "intcode" }
+itertools = "0.8.2"
+float-cmp = "0.6.0"
+
+[[bin]]
+name = "2019_day01"
+path = "src/bin/day01.rs"
+
+[[bin]]
+name = "2019_day02"
+path = "src/bin/day02.rs"
+
+[[bin]]
+name = "2019_day03"
+path = "src/bin/day03.rs"
+
+[[bin]]
+name = "2019_day04"
+path = "src/bin/day04.rs"
+
+[[bin]]
+name = "2019_day05"
+path = "src/bin/day05.rs"
+
+[[bin]]
+name = "2019_day06"
+path = "src/bin/day06.rs"
+
+[[bin]]
+name = "2019_day07"
+path = "src/bin/day07.rs"
+
+[[bin]]
+name = "2019_day08"
+path = "src/bin/day08.rs"
+
+[[bin]]
+name = "2019_day09"
+path = "src/bin/day09.rs"
+
+[[bin]]
+name = "2019_day10"
+path = "src/bin/day10.rs"
+
+[[bin]]
+name = "2019_day11"
+path = "src/bin/day11.rs"

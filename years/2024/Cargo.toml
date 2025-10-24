@@ -1,0 +1,24 @@
+[package]
+name = "aoc_2024"
+version = "0.1.0"
+authors = ["benjaminch <benjamin.chastanier@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+aoc_utils = { path = "../../utils" }
+thiserror = "2.0.3"
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmarks"
+harness = false
+
+[[bin]]
+name = "2024_day01"
+path = "src/bin/day01.rs"
+
+[[bin]]
+name = "2024_day02"
+path = "src/bin/day02.rs"
