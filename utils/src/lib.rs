@@ -96,7 +96,6 @@ pub fn read_digit_grid(day: u8) -> Vec<Vec<u8>> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
 
     #[test]
     fn test_parse_numbers() {

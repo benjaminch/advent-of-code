@@ -134,14 +134,14 @@ mod tests {
     #[test]
     fn test_get_subset_summing_to() {
         // Setup:
-        const number_target: i64 = 127;
+        const NUMBER_TARGET: i64 = 127;
         let input = vec![
             35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309,
             576,
         ];
 
         // Execute:
-        let result = get_subset_summing_to(input, number_target);
+        let result = get_subset_summing_to(input, NUMBER_TARGET);
 
         // Verify:
         assert_eq!(Some(vec![15, 25, 47, 40]), result);
